@@ -19,6 +19,42 @@ Soda Candy es una aplicación web transaccional que digitaliza la operación de 
 - Sofía Loaiza Cabalceta
 
 ---
+## Ramas asignadas
+Integrante   Rama
+Michelle    Michelle
+Sofia       Sofia
+Ronald      Ronald
+Sheilyn     Sheilyn
+--
+
+- La rama main es la rama principal del proyecto. Solo llega código revisado y aprobado por el equipo. Nadie sube cambios directamente a main.
+Reglas del equipo
+
+- Cada persona trabaja únicamente en su propia rama. Antes de empezar a trabajar siempre se debe actualizar la rama. Los mensajes de commit deben ser claros y describir qué se hizo. Cuando una tarea esté lista, se abre un Pull Request hacia main para que el equipo lo revise y apruebe.
+
+## Pasos para trabajar cada día
+-- Clonar el repositorio, solo la primera vez:
+git clone <URL-del-repositorio>
+cd SodaCandy
+
+-- Cambiarse a tu rama y actualizarla antes de empezar:
+Ejemplo:
+git checkout Michelle
+git pull origin Michelle
+
+-- Guardar y subir los cambios:
+git add .
+git commit -m "Descripción de lo que hice"
+Ej: git push origin Michelle
+
+- Cuando una tarea esté completa, ir a GitHub, abrir un Pull Request desde tu rama hacia main y avisar al equipo.
+  
+## Buenas practicas para los commits
+Los mensajes deben indicar claramente que se hizo, por ejemplo: "Agrego formulario de login", "Corrijo error en la navegacion", "Creo componente de tabla de usuarios". Evitar mensajes vagos como "cambios" o "arreglos".
+
+## Recordatorios
+Si se borra algo por accidente Git guarda el historial, no hay que entrar en panico. Si hay un conflicto al hacer pull, avisar al equipo antes de resolverlo. Nunca usar git push --force sin consultar primero.
+Cualquier cambio a este acuerdo debe ser aprobado por todos los integrantes del equipo.
 
 ## Objetivos
 
