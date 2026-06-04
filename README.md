@@ -18,15 +18,14 @@ Soda Candy es una aplicación web transaccional que digitaliza la operación de 
 - Michelle Guerrero Brenes
 - Sofía Loaiza Cabalceta
 
----
 ## Ramas asignadas
-| Integrante        |   Rama     |
-|--------------------------------|
-| Michelle Guerrero |   Michelle |
-| Sofía Loaiza      |   Sofia    |
-| Fauricio Calderón |   Ronald   |
-| Sheilyn Córdoba   |   Sheilyn  |
---
+
+| Integrante          | Rama      |
+|---------------------|-----------|
+| Fauricio Calderon   | Ronald    |
+| Sheilyn Cordoba     | Sheilyn   |
+| Michelle Guerrero   | Michelle  |
+| Sofia Loaiza        | Sofia     |
 
 - La rama main es la rama principal del proyecto. Solo llega código revisado y aprobado por el equipo. Nadie sube cambios directamente a main.
 Reglas del equipo
