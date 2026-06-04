@@ -20,11 +20,11 @@ Soda Candy es una aplicación web transaccional que digitaliza la operación de 
 
 ---
 ## Ramas asignadas
-Integrante   Rama
-Michelle    Michelle
-Sofia       Sofia
-Ronald      Ronald
-Sheilyn     Sheilyn
+- Integrante           - Rama
+Michelle Guerrero     Michelle
+Sofía Loaiza          Sofia
+Fauricio Calderón     Ronald
+Sheilyn Córdoba       Sheilyn
 --
 
 - La rama main es la rama principal del proyecto. Solo llega código revisado y aprobado por el equipo. Nadie sube cambios directamente a main.
@@ -34,7 +34,7 @@ Reglas del equipo
 
 ## Pasos para trabajar cada día
 -- Clonar el repositorio, solo la primera vez:
-git clone <URL-del-repositorio>
+git clone [<URL-del-repositorio>](https://github.com/Michelle670/SodaCandy.git)
 cd SodaCandy
 
 -- Cambiarse a tu rama y actualizarla antes de empezar:
