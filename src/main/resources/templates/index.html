@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+
+        <section class="container py-5">
+            <div class="row justify-content-center text-center">
+                <div class="col-md-8">
+                    <h1 class="display-5" style="color: var(--soda-vino);">
+                        [[#{index.bienvenida}]]</h1>
+                    <p class="lead text-muted">[[#{index.intro}]]</p>
+                    <a th:href="@{/menu/listado}" class="btn btn-soda-naranja btn-lg mt-2">
+                        <i class="fa-solid fa-book-open"></i> [[#{plantilla.menu}]]</a>
+                </div>
+            </div>
+        </section>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>

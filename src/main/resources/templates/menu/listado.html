@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+
+        <section class="container py-4">
+            <h2 class="mb-4"><i class="fa-solid fa-book-open text-success"></i> [[#{menu.titulo}]]</h2>
+
+            <!-- Por cada categoria activa se muestran sus platillos disponibles -->
+            <div th:each="cat : ${categorias}" class="mb-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0">[[${cat.descripcion}]]</h4>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <tbody>
+                                <tr th:each="p : ${productos}"
+                                    th:if="${p.idCategoria == cat.idCategoria and p.disponible}">
+                                    <td style="width:70px;">
+                                        <img th:if="${p.rutaImagen != null and !p.rutaImagen.isEmpty()}"
+                                             th:src="@{${p.rutaImagen}}" alt="img" height="50"/>
+                                    </td>
+                                    <td>
+                                        <strong>[[${p.descripcion}]]</strong><br/>
+                                        <small class="text-muted">[[${p.detalle}]]</small>
+                                    </td>
+                                    <td class="text-end align-middle">
+                                        <span class="badge bg-warning text-dark fs-6">
+                                            &cent; [[${#numbers.formatDecimal(p.precio, 0, 'COMMA', 0, 'POINT')}]]</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center p-3" th:if="${categorias == null or categorias.empty}">
+                <span>[[#{lista.vacia}]]</span>
+            </div>
+        </section>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+    </body>
+</html>
