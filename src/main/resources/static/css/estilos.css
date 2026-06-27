@@ -1,0 +1,125 @@
+/* ============================================================
+   Soda Candy - Estilos de marca
+   Variables CSS de marca aplicadas SOBRE Bootstrap (sin romperlo).
+   Bootstrap sigue siendo el framework base (WebJars), igual que en clase;
+   aqui solo se agregan colores y el wordmark de la marca.
+   ============================================================ */
+
+:root {
+  --soda-vino: #590202;
+  --soda-bright: #BF1B1B;
+  --soda-durazno: #F2B872;
+  --soda-durazno-claro: #FBF2E1;
+  --soda-naranja: #D96704;
+  --soda-naranja-oscuro: #B85503;
+  --soda-verde: #20402E;
+  --soda-verde-oscuro: #173021;
+}
+
+/* === Wordmark "Soda Candy" en el navbar === */
+.brand-wordmark {
+  font-family: 'Lobster', cursive;
+  font-size: 1.85rem;
+  letter-spacing: 0.5px;
+  color: white !important;
+}
+
+/* === Navbar con color vino de marca === */
+.navbar-soda {
+  background-color: var(--soda-vino);
+}
+.navbar-soda .nav-link {
+  color: rgba(255, 255, 255, 0.85);
+}
+.navbar-soda .nav-link:hover,
+.navbar-soda .nav-link.active {
+  color: var(--soda-durazno) !important;
+}
+.navbar-soda .navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.navbar-soda .dropdown-menu {
+  border-top: 3px solid var(--soda-durazno);
+}
+
+/* === Banner del lema === */
+.banner-lema {
+  background-color: var(--soda-verde);
+  color: white;
+  border-bottom: 4px solid var(--soda-durazno);
+}
+
+/* === Botones de marca === */
+.btn-soda-naranja {
+  background-color: var(--soda-naranja);
+  color: white;
+  border: none;
+}
+.btn-soda-naranja:hover,
+.btn-soda-naranja:focus {
+  background-color: var(--soda-naranja-oscuro);
+  color: white;
+}
+.btn-soda-verde {
+  background-color: var(--soda-verde);
+  color: white;
+  border: none;
+}
+.btn-soda-verde:hover,
+.btn-soda-verde:focus {
+  background-color: var(--soda-verde-oscuro);
+  color: white;
+}
+
+/* === Footer de marca (vino, estilo Figma) === */
+.footer-soda {
+  background-color: var(--soda-vino);
+  color: rgba(255, 255, 255, 0.75);
+  border-top: 4px solid var(--soda-durazno);
+}
+.footer-soda .footer-wordmark {
+  font-family: 'Lobster', cursive;
+  font-size: 1.6rem;
+  color: #fff;
+}
+.footer-soda a {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+}
+.footer-soda a:hover {
+  color: var(--soda-durazno);
+}
+.footer-soda .footer-copy {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* === Boton "Acceso Staff" del navbar === */
+.btn-acceso-staff {
+  background-color: var(--soda-naranja);
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 0.35rem 1.1rem;
+}
+.btn-acceso-staff:hover,
+.btn-acceso-staff:focus {
+  background-color: var(--soda-naranja-oscuro);
+  color: #fff;
+}
+
+/* === Cards de mesa (utiles para cuando se haga el panel de mesas, HU-15) === */
+.mesa-card {
+  border-radius: 8px;
+  min-height: 140px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.mesa-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+}
+.mesa-libre   { background-color: var(--soda-verde);   color: white; }
+.mesa-ocupada { background-color: var(--soda-vino);    color: white; }
+.mesa-cobrar  { background-color: var(--soda-naranja); color: white; }
