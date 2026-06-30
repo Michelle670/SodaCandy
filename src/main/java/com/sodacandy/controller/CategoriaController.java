@@ -27,6 +27,7 @@ public class CategoriaController {
         this.messageSource = messageSource;
     }
 
+    // Muestra la tabla con todas las categorías.
     @GetMapping("/listado")
     public String listado(Model model) {
         var categorias = categoriaService.getCategorias(false);
@@ -35,6 +36,8 @@ public class CategoriaController {
         return "/categoria/listado";
     }
 
+    // Trae los datos de una categoría puntual para llenar el formulario de edición.
+    // Si el id no existe, regresa al listado con un mensaje de error.
     @GetMapping("/modificar/{idCategoria}")
     public String modificar(@PathVariable("idCategoria") Integer idCategoria,
             Model model, RedirectAttributes redirectAttributes) {
@@ -48,6 +51,7 @@ public class CategoriaController {
         return "/categoria/modifica";
     }
 
+    // Guarda una categoría nueva o actualiza una existente.
     @PostMapping("/guardar")
     public String guardar(@Valid Categoria categoria, RedirectAttributes redirectAttributes) {
         categoriaService.save(categoria);
@@ -56,6 +60,7 @@ public class CategoriaController {
         return "redirect:/categoria/listado";
     }
 
+    // Elimina una categoría. Si ya tiene productos asociados no se deja borrar.
     @PostMapping("/eliminar")
     public String eliminar(@RequestParam Integer idCategoria, RedirectAttributes redirectAttributes) {
         String titulo = "todoOk";

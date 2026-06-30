@@ -33,6 +33,8 @@ public class ProductoController {
         this.messageSource = messageSource;
     }
 
+    // Muestra la tabla con todos los productos.
+    // Tambien se manda la lista de categorias activas para el modal de "Agrega
     @GetMapping("/listado")
     public String listado(Model model) {
         var productos = productoService.getProductos(false);
@@ -43,6 +45,8 @@ public class ProductoController {
         return "/producto/listado";
     }
 
+    // Trae los datos de un producto puntual para llenar el formulario de edicion.
+    // Si el id no existe, regresa al listado con un mensaje de error.
     @GetMapping("/modificar/{idProducto}")
     public String modificar(@PathVariable("idProducto") Integer idProducto,
             Model model, RedirectAttributes redirectAttributes) {
@@ -57,6 +61,7 @@ public class ProductoController {
         return "/producto/modifica";
     }
 
+    // Guarda un producto nuevo o actualiza uno existente.
     @PostMapping("/guardar")
     public String guardar(@Valid Producto producto, RedirectAttributes redirectAttributes) {
         productoService.save(producto);
@@ -65,7 +70,7 @@ public class ProductoController {
         return "redirect:/producto/listado";
     }
 
-    // HU-08: Botón agotado/disponible
+    // Botón que cambia el estado de disponible/agotado.
     @PostMapping("/toggleDisponible")
     public String toggleDisponible(@RequestParam Integer idProducto,
             RedirectAttributes redirectAttributes) {
@@ -85,6 +90,7 @@ public class ProductoController {
         return "redirect:/producto/listado";
     }
 
+    // Elimina un producto. Si ya tiene pedidos asociados no se deja borrar.
     @PostMapping("/eliminar")
     public String eliminar(@RequestParam Integer idProducto, RedirectAttributes redirectAttributes) {
         String titulo = "todoOk";
