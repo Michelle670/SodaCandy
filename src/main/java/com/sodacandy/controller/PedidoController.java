@@ -1,9 +1,9 @@
-
 package com.sodacandy.controller;
 
 import com.sodacandy.domain.Pedido;
 import com.sodacandy.service.PedidoService;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import org.springframework.context.MessageSource;
@@ -18,8 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller// Anotacion controller
 @RequestMapping("/pedido")// todo lo que se pida bajo /rol lo resuelve este codigo
-public class PedidoController
-{
+public class PedidoController {
+
     //Para enlazar el servicio del rol y los mensajes i18n
     private final PedidoService pedidoService;
     private final MessageSource messageSource;
@@ -29,23 +29,29 @@ public class PedidoController
         this.messageSource = messageSource;
     }
 
-
     //metodo del listado
     @GetMapping("/listado")
-    public String listado(Model model)
-    {
-        var pedidos = pedidoService.getPedidos();
+    public String listado(Model model) {
+        List<Pedido> pedidos = pedidoService.getPedidos();
         model.addAttribute("pedidos", pedidos);
-        model.addAttribute("totalPedidos", pedidos.size());
+        
+        // Contadores basados en el flujo filtrado
+        long enCurso = pedidos.stream().filter(p -> "EN_CURSO".equals(p.getEstado().name())).count();
+        long pagados = pedidos.stream().filter(p -> "PAGADO".equals(p.getEstado().name())).count();
+        
+        model.addAttribute("totalPedidosEnCurso", enCurso);
+        model.addAttribute("totalPedidosPagados", pagados);
+        model.addAttribute("pedido", new Pedido());
+        
         return "/pedido/listado";
     }
+
 
     //metodo que abre la pagina de edicion
     @GetMapping("/modificar/{idPedido}")
     public String modificar(@PathVariable("idPedido") Integer idPedido,
             Model model,
-            RedirectAttributes redirectAttributes)
-    {
+            RedirectAttributes redirectAttributes) {
         Optional<Pedido> pedidoOpt = pedidoService.getPedido(idPedido);
         if (pedidoOpt.isEmpty()) { // si no lo encontraron...
             redirectAttributes.addFlashAttribute("error",
@@ -58,8 +64,7 @@ public class PedidoController
 
     //metodo que inserta o actualiza (segun venga o no el idRol)
     @PostMapping("/guardar")
-    public String guardar(@Valid Pedido pedido, RedirectAttributes redirectAttributes)
-    {
+    public String guardar(@Valid Pedido pedido, RedirectAttributes redirectAttributes) {
         pedidoService.save(pedido);
         redirectAttributes.addFlashAttribute("todoOk",
                 messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
@@ -68,8 +73,7 @@ public class PedidoController
 
     //metodo que elimina
     @PostMapping("/eliminar")
-    public String eliminar(@RequestParam Integer idPedido, RedirectAttributes redirectAttributes)
-    {
+    public String eliminar(@RequestParam Integer idPedido, RedirectAttributes redirectAttributes) {
         String titulo = "todoOk";
         String detalle = "mensaje.eliminado";
         try {

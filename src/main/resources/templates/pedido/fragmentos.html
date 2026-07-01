@@ -4,7 +4,7 @@
     <head th:replace="~{general/fragmentos :: head}"/>
 
     <body>
-        
+
         <!-- fragmento 1 para Agregar rol en ventana modal -->
         <section th:fragment="agregar">
             <!-- Button trigger modal -->
@@ -33,7 +33,12 @@
                             <div class="modal-body">
                                 <div class='mb-3'>
                                     <label>[[#{pedido.pedido}]]</label>
-                                    <input type="text" name='rol' class='form-control' required="true"/></div>
+                                    <input type="text" name='pedido' class='form-control' required="true"/>
+                                </div>
+                                <div class='mb-3'>
+                                    <label>[[#{pedido.pedido}]]</label>
+                                    <input type="text" name='pedido' class='form-control' required="true"/>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -47,12 +52,14 @@
             </div>
         </section>
 
-        <!-- fragmento 2 para el listado de pedidos -->
-        <section th:fragment="listado" class="p-3">
+        <!-- fragmento 2 para el listado de pedidos en curso -->
+        <section th:fragment="listadoEnCurso" class="p-3">
             <div class="row p-3">
                 <div class="col-md-9">
                     <div class="card p-2">
-                        <div class="card-header"><h4>[[#{pedido.listado}]]</h4></div>
+                        <div class="card-header">
+                            <h4>[[#{pedido.listadoEnCurso}]]</h4>
+                        </div>
                         <div class="card-body">
                             <div th:if="${pedidos != null and !pedidos.empty}">
                                 <table class="table table-striped table-hover">
@@ -61,22 +68,31 @@
                                             <th>[[#{pedido.pedido}]]</th>
                                             <th>[[#{pedido.usuario}]]</th>
                                             <th>[[#{pedido.mesa}]]</th>
+                                            <th>[[#{pedido.nombreCliente}]]</th>
+                                            <th>[[#{pedido.telefono}]]</th>
+                                            <th>[[#{pedido.estado}]]</th>
+                                            <th>[[#{pedido.total}]]</th>
+                                            <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="p : ${pedidos}">
+                                        <tr th:each="p : ${pedidos}" th:if="${p.estado.name() == 'EN_CURSO'}">
                                             <td>[[${p.idPedido}]]</td>
                                             <td>[[${p.idUsuario}]]</td>
                                             <td>[[${p.idMesa != null ? p.idMesa : #messages.msg('pedido.paraLlevar')}]]</td>
+                                            <td>[[${p.nombreCliente != null ? p.nombreCliente : #messages.msg('pedido.sinNombre')}]]</td>
+                                            <td>[[${p.telefono != null ? p.telefono : #messages.msg('pedido.sinTelefono')}]]</td>
+                                            <td><span class="badge bg-warning text-dark">[[${p.estado}]]</span></td>
+                                            <td>[[${#numbers.formatCurrency(p.total)}]]</td>
                                             <td>
-                                                <button type="button" class="btn btn-danger"
+                                                <button type="button" class="btn btn-danger btn-sm"
                                                         data-bs-toggle="modal" data-bs-target="#confirmModal"
                                                         th:data-bs-id="${p.idPedido}"
                                                         th:data-bs-usuario="${p.idUsuario}"
                                                         th:data-bs-mesa="${p.idMesa}">
                                                     <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]
                                                 </button>
-                                                <a th:href="@{/pedido/modificar/}+${p.idPedido}" class="btn btn-warning">
+                                                <a th:href="@{/pedido/modificar/}+${p.idPedido}" class="btn btn-warning btn-sm">
                                                     <i class="fas fa-pencil-alt"></i> [[#{accion.actualizar}]]
                                                 </a>
                                             </td>
@@ -91,13 +107,70 @@
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card text-center bg-success text-white mb-3">
-                        <div class="card-body"><h3>[[#{pedido.total}]]</h3>
-                            <h4 class="fs-2">[[${totalPedidos}]]</h4>
-                        </div></div>
+                    <div class="card text-center bg-warning text-dark mb-3">
+                        <div class="card-body">
+                            <h3>[[#{pedido.listadoEnCurso}]]</h3>
+                            <h4 class="fs-2">[[${totalPedidosEnCurso != null ? totalPedidosEnCurso : 0}]]</h4>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
+
+        <!-- fragmento 3 para el listado de pedidos pagados -->
+        <section th:fragment="listadoTerminados" class="p-3">
+            <div class="row p-3">
+                <div class="col-md-9">
+                    <div class="card p-2">
+                        <div class="card-header">
+                            <h4>[[#{pedido.listadoTerminados}]]</h4>
+                        </div>
+                        <div class="card-body">
+                            <div th:if="${pedidos != null and !pedidos.empty}">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>[[#{pedido.pedido}]]</th>
+                                            <th>[[#{pedido.usuario}]]</th>
+                                            <th>[[#{pedido.mesa}]]</th>
+                                            <th>[[#{pedido.nombreCliente}]]</th>
+                                            <th>[[#{pedido.telefono}]]</th>
+                                            <th>[[#{pedido.estado}]]</th>
+                                            <th>[[#{pedido.total}]]</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="p : ${pedidos}" th:if="${p.estado.name() == 'PAGADO'}">
+                                            <td>[[${p.idPedido}]]</td>
+                                            <td>[[${p.idUsuario}]]</td>
+                                            <td>[[${p.idMesa != null ? p.idMesa : #messages.msg('pedido.paraLlevar')}]]</td>
+                                            <td>[[${p.nombreCliente != null ? p.nombreCliente : #messages.msg('pedido.sinNombre')}]]</td>
+                                            <td>[[${p.telefono != null ? p.telefono : #messages.msg('pedido.sinTelefono')}]]</td>
+                                            <td><span class="badge bg-success">[[${p.estado}]]</span></td>
+                                            <td>[[${#numbers.formatCurrency(p.total)}]]</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-center p-2" th:if="${pedidos == null or pedidos.empty}">
+                                <span>[[#{lista.vacia}]]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center bg-success text-white mb-3">
+                        <div class="card-body">
+                            <h3>[[#{pedido.listadoTerminados}]]</h3>
+                            <h4 class="fs-2">[[${totalPedidosPagados != null ? totalPedidosPagados : 0}]]</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
 
         <!-- 3 Fragmento que se utiliza en la pagina modifica.html -->
         <section th:fragment="editar">
@@ -136,7 +209,7 @@
             </div>
         </section>
 
-        <!-- 4 fragmento que se utiliza para confirmar que se desea eliminar un rol -->
+        <!-- 4 fragmento que se utiliza para confirmar que se desea eliminar un Pedido -->
         <section th:fragment="confirmarEliminar">
             <div class="modal fade"
                  id="confirmModal"
