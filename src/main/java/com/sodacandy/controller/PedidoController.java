@@ -63,7 +63,7 @@ public class PedidoController {
         return "/pedido/modifica";
     }
 
-    //metodo que inserta o actualiza (segun venga o no el idRol)
+    //metodo que inserta o actualiza (segun venga o no el idPedido)
     @PostMapping("/guardar")
     public String guardar(Pedido pedido, RedirectAttributes redirectAttributes) {
 
@@ -132,4 +132,34 @@ public class PedidoController {
                 messageSource.getMessage(detalle, null, Locale.getDefault()));
         return "redirect:/pedido/listado";
     }
+    
+    // Método que anula un pedido cambiando su estado
+    @PostMapping("/anular")
+    public String anular(@RequestParam("idPedido") Integer idPedido, RedirectAttributes redirectAttributes) {
+        String titulo = "todoOk";
+        String detalle = "mensaje.anulado";
+        
+        try {
+            Optional<Pedido> pedidoOpt = pedidoService.getPedido(idPedido);
+            if (pedidoOpt.isPresent()) {
+                Pedido pedido = pedidoOpt.get();
+                // Cambiamos el estado a ANULADO utilizando el Enum
+                pedido.setEstado(com.sodacandy.domain.EstadoPedido.ANULADO);
+                pedidoService.save(pedido);
+            } else {
+                titulo = "error";
+                detalle = "rol.error01"; // No se encontró el pedido
+            }
+        } catch (Exception e) {
+            titulo = "error";
+            detalle = "rol.error03"; // Error inesperado
+        }
+        
+        redirectAttributes.addFlashAttribute(titulo,
+                messageSource.getMessage(detalle, null, Locale.getDefault()));
+        return "redirect:/pedido/listado";
+    }
+    
+    
+
 }

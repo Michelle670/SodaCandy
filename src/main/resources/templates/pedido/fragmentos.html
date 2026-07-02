@@ -96,7 +96,7 @@
                                                         th:data-bs-id="${p.idPedido}"
                                                         th:data-bs-usuario="${p.idUsuario}"
                                                         th:data-bs-mesa="${p.idMesa}">
-                                                    <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]
+                                                    <i class="fa-solid fa-trash"></i> [[#{pedido.anular}]]
                                                 </button>
                                                 <a th:href="@{/pedido/modificar/}+${p.idPedido}" class="btn btn-warning btn-sm">
                                                     <i class="fas fa-pencil-alt"></i> [[#{accion.actualizar}]]
@@ -226,8 +226,8 @@
                  aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered custom-modal-animation">
                     <div class="modal-content animate-slide-up">
-                        <form th:action="@{/rol/eliminar}" method="post">
-                            <input type="hidden" name="idRol" id="modalId"/>
+                        <form th:action="@{/pedido/eliminar}" method="post">
+                            <input type="hidden" name="idPedido" id="modalId"/>
                             <div class="modal-header bg-warning text-white">
                                 <h5 class="modal-title" id="modalLabel">
                                     <i class="fa-solid fa-circle-radiation"></i> [[#{accion.confirmar}]]
@@ -240,7 +240,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="submit" class="btn btn-danger">
-                                    <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]
+                                    <i class="fa-solid fa-trash"></i> [[#{pedido.anular}]]
                                 </button>
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                     <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]
