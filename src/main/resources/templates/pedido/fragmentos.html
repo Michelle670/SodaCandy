@@ -5,46 +5,50 @@
 
     <body>
 
-        <!-- fragmento 1 para Agregar rol en ventana modal -->
+        <!-- fragmento 1 para Agregar un pedido en ventana modal -->
         <section th:fragment="agregar">
-            <!-- Button trigger modal -->
             <div class='row py-4 mb-2 bg-light'>
                 <div class='col-md-1'></div>
                 <div class='col-md-3'>
-                    <!-- El profe pondra aqui sec:authorize="hasRole('ROLE_ADMIN')" cuando ensene seguridad -->
                     <button type="button" class="btn btn-primary"
                             data-bs-toggle="modal" data-bs-target="#crearPedidoModal">
-                        <i class="fa-solid fa-plus"></i> [[#{pedido.crear}]]
+                        <i class="fa-solid fa-plus"></i> [[#{pedido.crearParaLlevar}]]
                     </button>
                 </div>
             </div>
-            <!-- Modal -->
-            <div class="modal fade" id="crearPedidoModal" tabindex="-1"
-                 aria-labelledby="crearPedidoLabel" aria-hidden="true">
+
+            <div class="modal fade" id="crearPedidoModal" tabindex="-1" aria-labelledby="crearPedidoLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header bg-info text-white">
                             <h1 class="modal-title fs-5" id="crearPedidoLabel">
-                                <i class="fa-solid fa-user-shield"></i> [[#{pedido.crear}]]</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <i class="fa-solid fa-cart-plus"></i> [[#{pedido.crearParaLlevar}]]
+                            </h1>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <form th:action='@{/pedido/guardar}' th:object='${pedido}'
-                              class='was-validated' method="post">
+
+                        <form th:action="@{/pedido/guardar}" th:object="${pedido}" method="POST" class="was-validated">
                             <div class="modal-body">
-                                <div class='mb-3'>
-                                    <label>[[#{pedido.pedido}]]</label>
-                                    <input type="text" name='pedido' class='form-control' required="true"/>
+                                <input type="hidden" th:field="*{idPedido}" />
+
+                                <div class="mb-3">
+                                    <label for="nombreCliente" class="form-label">[[#{pedido.nombreCliente}]]</label>
+                                    <input type="text" class="form-control" th:field="*{nombreCliente}" required="true" maxlength="100"/>
                                 </div>
-                                <div class='mb-3'>
-                                    <label>[[#{pedido.pedido}]]</label>
-                                    <input type="text" name='pedido' class='form-control' required="true"/>
+
+                                <div class="mb-3">
+                                    <label for="telefono" class="form-label">[[#{pedido.telefono}]]</label>
+                                    <input type="tel" class="form-control" th:field="*{telefono}" required="true" maxlength="25"/>
                                 </div>
                             </div>
+
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]</button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa-solid fa-floppy-disk"></i> [[#{accion.guardar}]]</button>
+                                    [[#{accion.cancelar}]]
+                                </button>
+                                <button type="submit" class="btn btn-info text-white">
+                                    <i class="fa-solid fa-arrow-right"></i> [[#{accion.crear}]]
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -72,18 +76,20 @@
                                             <th>[[#{pedido.telefono}]]</th>
                                             <th>[[#{pedido.estado}]]</th>
                                             <th>[[#{pedido.total}]]</th>
+                                            <th>[[#{pedido.fecha}]]</th>
                                             <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="p : ${pedidos}" th:if="${p.estado.name() == 'EN_CURSO'}">
+                                        <tr th:each="p : ${pedidos}" th:if="${p.estado.name() == 'EN_PREPARACION' || p.estado.name() == 'PENDIENTE' || p.estado.name() == 'SERVIDO'}">
                                             <td>[[${p.idPedido}]]</td>
                                             <td>[[${p.idUsuario}]]</td>
                                             <td>[[${p.idMesa != null ? p.idMesa : #messages.msg('pedido.paraLlevar')}]]</td>
                                             <td>[[${p.nombreCliente != null ? p.nombreCliente : #messages.msg('pedido.sinNombre')}]]</td>
                                             <td>[[${p.telefono != null ? p.telefono : #messages.msg('pedido.sinTelefono')}]]</td>
-                                            <td><span class="badge bg-warning text-dark">[[${p.estado}]]</span></td>
+                                            <td><span class="badge" th:classappend="${p.estado.name() == 'SERVIDO' ? 'bg-success' : (p.estado.name() == 'EN_PREPARACION' ? 'bg-warning' : (p.estado.name() == 'PENDIENTE' ? 'bg-danger' : 'bg-secondary'))}">[[${#strings.replace(p.estado.name(), '_', ' ')}]]</span></td>
                                             <td>[[${#numbers.formatCurrency(p.total)}]]</td>
+                                            <td>[[${p.fecha}]]</td>
                                             <td>
                                                 <button type="button" class="btn btn-danger btn-sm"
                                                         data-bs-toggle="modal" data-bs-target="#confirmModal"
@@ -137,18 +143,20 @@
                                             <th>[[#{pedido.telefono}]]</th>
                                             <th>[[#{pedido.estado}]]</th>
                                             <th>[[#{pedido.total}]]</th>
+                                            <th>[[#{pedido.fecha}]]</th>
                                             <th></th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr th:each="p : ${pedidos}" th:if="${p.estado.name() == 'PAGADO'}">
+                                        <tr th:each="p : ${pedidos}" th:if="${p.estado.name() == 'PAGADO' || p.estado.name() == 'ANULADO'}">
                                             <td>[[${p.idPedido}]]</td>
                                             <td>[[${p.idUsuario}]]</td>
                                             <td>[[${p.idMesa != null ? p.idMesa : #messages.msg('pedido.paraLlevar')}]]</td>
                                             <td>[[${p.nombreCliente != null ? p.nombreCliente : #messages.msg('pedido.sinNombre')}]]</td>
                                             <td>[[${p.telefono != null ? p.telefono : #messages.msg('pedido.sinTelefono')}]]</td>
-                                            <td><span class="badge bg-success">[[${p.estado}]]</span></td>
+                                            <td><span class="badge" th:classappend="${p.estado.name() == 'PAGADO' ? 'bg-success' : (p.estado.name() == 'ANULADO' ? 'bg-danger' : 'bg-secondary')}">[[${p.estado}]]</span></td>
                                             <td>[[${#numbers.formatCurrency(p.total)}]]</td>
+                                            <td>[[${p.fecha}]]</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -172,7 +180,7 @@
 
 
 
-        <!-- 3 Fragmento que se utiliza en la pagina modifica.html -->
+        <!-- 3 Fragmento que se utiliza en la pagina modifica.html 
         <section th:fragment="editar">
             <div class="row">
                 <div class="col-md-2"></div>

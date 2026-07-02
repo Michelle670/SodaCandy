@@ -1,6 +1,8 @@
 package com.sodacandy.controller;
 
 import com.sodacandy.domain.Pedido;
+import com.sodacandy.domain.EstadoPedido;
+import com.sodacandy.domain.TipoPedido;
 import com.sodacandy.service.PedidoService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -34,18 +36,17 @@ public class PedidoController {
     public String listado(Model model) {
         List<Pedido> pedidos = pedidoService.getPedidos();
         model.addAttribute("pedidos", pedidos);
-        
+
         // Contadores basados en el flujo filtrado
-        long enCurso = pedidos.stream().filter(p -> "EN_CURSO".equals(p.getEstado().name())).count();
-        long pagados = pedidos.stream().filter(p -> "PAGADO".equals(p.getEstado().name())).count();
-        
+        long enCurso = pedidos.stream().filter(p -> "EN_PREPARACION".equals(p.getEstado().name()) || "PENDIENTE".equals(p.getEstado().name()) || "SERVIDO".equals(p.getEstado().name())).count();
+        long pagados = pedidos.stream().filter(p -> "PAGADO".equals(p.getEstado().name()) || "ANULADO".equals(p.getEstado().name())).count();
+
         model.addAttribute("totalPedidosEnCurso", enCurso);
         model.addAttribute("totalPedidosPagados", pagados);
         model.addAttribute("pedido", new Pedido());
-        
+
         return "/pedido/listado";
     }
-
 
     //metodo que abre la pagina de edicion
     @GetMapping("/modificar/{idPedido}")
@@ -64,11 +65,50 @@ public class PedidoController {
 
     //metodo que inserta o actualiza (segun venga o no el idRol)
     @PostMapping("/guardar")
-    public String guardar(@Valid Pedido pedido, RedirectAttributes redirectAttributes) {
+    public String guardar(Pedido pedido, RedirectAttributes redirectAttributes) {
+
+        // 1. Se verifica si es un INSERT (pedido nuevo) o un UPDATE
+        if (pedido.getIdPedido() == null) {
+
+            // Valores comunes obligatorios para CUALQUIER tipo de pedido nuevo
+            pedido.setIdUsuario(1); // Temporal: Usuario por defecto (Salonero/Cajero)
+            pedido.setTotal(java.math.BigDecimal.ZERO); // Inicializa en 0.00
+            pedido.setFecha(java.time.LocalDateTime.now()); // Timestamp actual del sistema
+
+            // Condicional segun el tipo de pedido
+            if (pedido.getIdMesa() != null) { // Si el pedido es para una mesa, se definen los siguientes parámetros
+                // --- FLUJO A: PEDIDO DE MESA ---
+                pedido.setTipo(com.sodacandy.domain.TipoPedido.MESA);
+                pedido.setNombreCliente(null); // No lleva cliente directo, está asociado a la mesa
+                pedido.setTelefono(null);
+                pedido.setEstado(com.sodacandy.domain.EstadoPedido.PENDIENTE); // Estado inicial de ordenamiento
+            } else {
+                // --- FLUJO B: PEDIDO PARA LLEVAR ---
+                pedido.setTipo(com.sodacandy.domain.TipoPedido.PARA_LLEVAR);
+                pedido.setEstado(com.sodacandy.domain.EstadoPedido.EN_PREPARACION); // Estado inicial de ordenamiento
+                // El nombreCliente y telefono se mapean desde el modal
+            }
+
+        } else {
+            // Es un UPDATE: Mantener consistencia si hace falta
+            if (pedido.getFecha() == null) {
+                pedido.setFecha(java.time.LocalDateTime.now());
+            }
+        }
+
+        // 2. Persistencia en la base de datos
         pedidoService.save(pedido);
-        redirectAttributes.addFlashAttribute("todoOk",
-                messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
-        return "redirect:/pedido/listado";
+
+        // 3. Mensaje de éxito
+        redirectAttributes.addFlashAttribute("todoOk", messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
+
+        if (pedido.getTipo() == com.sodacandy.domain.TipoPedido.PARA_LLEVAR) {
+            // Si el pedido es para llevar, va directo a la pantalla para seleccionar productos
+            return "redirect:/pedido/modificar/" + pedido.getIdPedido();
+        } else {
+            // Si el pedido es de una mesa, se redirige a la lista de pedidos hasta que el salonero decida tomar la orden de la mesa
+            return "redirect:/pedido/listado";
+        }
     }
 
     //metodo que elimina
