@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+    <head th:replace="~{general/fragmentos :: head}"></head>
+    <body>
+        <header th:replace="~{general/fragmentos :: header}"></header>
+
+        <section th:replace="~{pago/fragmentos :: agregar}"/>
+        <section th:replace="~{pago/fragmentos :: listado}"/>
+        <section th:replace="~{pago/fragmentos :: confirmarEliminar}"/>
+        <section th:replace="~{general/fragmentos :: mostrarToast}"/>
+
+        <footer th:replace="~{general/fragmentos :: footer}"></footer>
+
+        <!-- Pasa el id del pago (data-id del boton) al input oculto del modal.
+             Si tu rutinas.js ya maneja el modal de eliminar de forma generica,
+             podes borrar este bloque. -->
+        <script>
+            const modalEliminarPago = document.getElementById('eliminarPagoModal');
+            if (modalEliminarPago) {
+                modalEliminarPago.addEventListener('show.bs.modal', function (event) {
+                    const idPago = event.relatedTarget.getAttribute('data-id');
+                    document.getElementById('idPagoEliminar').value = idPago;
+                });
+            }
+        </script>
+    </body>
+</html>

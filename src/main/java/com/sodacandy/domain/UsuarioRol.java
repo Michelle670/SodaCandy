@@ -1,10 +1,17 @@
-
+//==============================================================================
+// IMPORTES
+//==============================================================================
 package com.sodacandy.domain;
-
 import jakarta.persistence.*;
 import java.io.Serializable;
 import lombok.Data;
-
+//==============================================================================
+// CURSO : APLICACIONES WEB Y PATRONES
+// PROF: WILBERT MOLINA
+// ENTREGABLE:PROYECTO
+// GRUPO:6
+// INTEGRANTES:RONALD CALDERON, SHEILYN CORDOBA, MICHELLE GUERRERO, SOFIA LOAIZA
+//==============================================================================
 @Data
 @Entity
 @Table(name="usuario_rol")

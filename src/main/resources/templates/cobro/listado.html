@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      th:lang="${#locale.language}" lang="es">
+<head th:replace="~{general/fragmentos :: head}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+    <div th:replace="~{staff/fragmentos :: headerStaff}"></div>
+
+    <div class="d-flex flex-grow-1">
+        <div th:replace="~{staff/fragmentos :: sidebarStaff}"></div>
+
+        <main class="flex-grow-1 p-4">
+
+            <style>
+                .cobro-titulo { color:#590202; font-weight:700; }
+                /* Lista de pendientes (columna izquierda) */
+                .pend-item { display:block; padding:.7rem 1rem; border:1px solid #eee;
+                             border-radius:8px; margin-bottom:.5rem; text-decoration:none;
+                             color:#57423f; background:#fff; }
+                .pend-item:hover { background:#fff4ec; color:#57423f; }
+                .pend-item.activo { background:#590202; color:#fff; border-color:#590202; }
+                .pend-item .mesa { font-size:.78rem; opacity:.8; }
+                /* Metodo de pago como botones seleccionables */
+                .metodo-label { border:1px solid #d96704; border-radius:8px; padding:.6rem;
+                                text-align:center; cursor:pointer; color:#8a4b00; display:block; }
+                .btn-check:checked + .metodo-label { background:#d96704; color:#fff; }
+                .btn-cobrar { background:#590202; color:#fff; }
+                .btn-cobrar:hover { background:#3d0101; color:#fff; }
+                .tabla-detalle td, .tabla-detalle th { padding:.5rem .25rem; }
+            </style>
+
+            <div class="mb-4">
+                <h2 class="cobro-titulo mb-1">[[#{cobro.titulo}]]</h2>
+                <p class="text-muted mb-0">[[#{cobro.subtitulo}]]</p>
+            </div>
+
+            <div class="row g-4">
+
+                <!-- ===== IZQUIERDA: pedidos por cobrar ===== -->
+                <div class="col-lg-4">
+                    <h6 class="text-uppercase text-muted mb-3">[[#{cobro.pendientes}]]</h6>
+
+                    <div th:if="${pendientes.isEmpty()}" class="text-muted small">
+                        [[#{cobro.sinPendientes}]]
+                    </div>
+
+                    <a th:each="p : ${pendientes}"
+                       th:href="@{/cobro/listado(idPedido=${p.idPedido})}"
+                       class="pend-item"
+                       th:classappend="${idSeleccionado != null and idSeleccionado == p.idPedido} ? 'activo' : ''">
+                        <div class="fw-semibold">
+                            <span th:if="${p.idMesa != null}">[[#{cobro.mesa}]] [[${p.idMesa}]]</span>
+                            <span th:unless="${p.idMesa != null}">[[#{cobro.paraLlevar}]]</span>
+                            &middot; [[#{cobro.pedido}]] #[[${p.idPedido}]]
+                        </div>
+                        <div class="mesa">&#8353;[[${p.total}]]</div>
+                    </a>
+                </div>
+
+                <!-- ===== DERECHA: detalle + cobro ===== -->
+                <div class="col-lg-8">
+
+                    <!-- Sin seleccion -->
+                    <div th:unless="${seleccionado}" class="alert alert-light border text-center py-5">
+                        <i class="fa-solid fa-hand-pointer fa-2x text-muted mb-2"></i>
+                        <p class="mb-0 text-muted">[[#{cobro.seleccione}]]</p>
+                    </div>
+
+                    <!-- Con seleccion -->
+                    <div th:if="${seleccionado}" class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-3" style="color:#590202;">
+                                <span th:if="${seleccionado.idMesa != null}">[[#{cobro.mesa}]] [[${seleccionado.idMesa}]]</span>
+                                <span th:unless="${seleccionado.idMesa != null}">[[#{cobro.paraLlevar}]]</span>
+                                &middot; [[#{cobro.pedido}]] #[[${seleccionado.idPedido}]]
+                            </h5>
+
+                            <!-- Detalle -->
+                            <table class="table tabla-detalle mb-3">
+                                <thead>
+                                    <tr class="text-muted small text-uppercase">
+                                        <th>[[#{cobro.detalle}]]</th>
+                                        <th class="text-end">[[#{cobro.subtotal}]]</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="l : ${seleccionado.lineas}">
+                                        <td>[[${l.cantidad}]] × [[${l.nombreProducto}]]</td>
+                                        <td class="text-end">&#8353;[[${l.subtotal}]]</td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="fw-bold" style="color:#590202;">
+                                        <td>[[#{cobro.total}]]</td>
+                                        <td class="text-end fs-5" id="totalPedido"
+                                            th:attr="data-total=${seleccionado.total}">&#8353;[[${seleccionado.total}]]</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                            <!-- Formulario de cobro -->
+                            <form th:action="@{/cobro/cobrar}" method="post">
+                                <input type="hidden" name="idPedido" th:value="${seleccionado.idPedido}"/>
+
+                                <label class="form-label fw-semibold">[[#{cobro.metodo}]]</label>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-4" th:each="m, iter : ${metodos}">
+                                        <input class="btn-check" type="radio" name="metodo"
+                                               th:id="'m' + ${iter.index}" th:value="${m}"
+                                               th:checked="${iter.index == 0}" required/>
+                                        <label class="metodo-label" th:for="'m' + ${iter.index}"
+                                               th:text="#{'metodo.' + ${m.name()}}">Efectivo</label>
+                                    </div>
+                                </div>
+
+                                <!-- Ayuda de vuelto (solo visual, para efectivo) -->
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">[[#{cobro.montoRecibido}]]</label>
+                                        <input type="number" step="0.01" min="0" class="form-control"
+                                               id="montoRecibido" oninput="calcularVuelto()"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">[[#{cobro.vuelto}]]</label>
+                                        <input type="text" class="form-control bg-light" id="vuelto" readonly/>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-cobrar w-100 py-2">
+                                    <i class="fa-solid fa-receipt"></i> [[#{cobro.cobrar}]]
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div th:replace="~{staff/fragmentos :: footerStaff}"></div>
+
+    <script>
+        // Calcula el vuelto (recibido - total). Solo ayuda visual para efectivo.
+        function calcularVuelto() {
+            var totalEl = document.getElementById('totalPedido');
+            if (!totalEl) return;
+            var total = parseFloat(totalEl.getAttribute('data-total')) || 0;
+            var recibido = parseFloat(document.getElementById('montoRecibido').value) || 0;
+            var vuelto = recibido - total;
+            document.getElementById('vuelto').value = vuelto >= 0 ? ('\u20A1' + vuelto.toFixed(2)) : '';
+        }
+    </script>
+
+</body>
+</html>

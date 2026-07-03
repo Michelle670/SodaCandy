@@ -1,14 +1,22 @@
-
+//==============================================================================
+// IMPORTES
+//==============================================================================
 package com.sodacandy.domain;
-
 import java.io.Serializable;
 import lombok.Data;
-
+//==============================================================================
+// CURSO : APLICACIONES WEB Y PATRONES
+// PROF: WILBERT MOLINA
+// ENTREGABLE:PROYECTO
+// GRUPO:6
+// INTEGRANTES:RONALD CALDERON, SHEILYN CORDOBA, MICHELLE GUERRERO, SOFIA LOAIZA
+//==============================================================================
 /**
  * Llave primaria compuesta para la tabla puente usuario_rol.
  * Se usa con @IdClass en la entidad UsuarioRol.
  * Lombok @Data genera equals() y hashCode() (obligatorios en una llave de JPA).
  */
+//==============================================================================
 @Data
 public class UsuarioRolPK implements Serializable
 {

@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      th:lang="${#locale.language}" lang="es">
     <head th:replace="~{general/fragmentos :: head}"></head>
     <body>
-        <header th:replace="~{general/fragmentos :: header}"></header>
+
+        <!-- Navbar PUBLICO Mismo de la bienvenida -->
+        <header th:replace="~{general/fragmentos :: headerPublico}"></header>
+
 
         <section class="container py-4">
             <h2 class="mb-4"><i class="fa-solid fa-book-open text-success"></i> [[#{menu.titulo}]]</h2>
-
             <!-- Por cada categoria activa se muestran sus platillos disponibles -->
             <div th:each="cat : ${categorias}" class="mb-4">
                 <div class="card">
@@ -37,12 +40,14 @@
                     </div>
                 </div>
             </div>
-
             <div class="text-center p-3" th:if="${categorias == null or categorias.empty}">
                 <span>[[#{lista.vacia}]]</span>
             </div>
         </section>
 
+
+        <!-- Footer publico (el mismo estilo vino de la bienvenida) -->
         <footer th:replace="~{general/fragmentos :: footer}"></footer>
+
     </body>
 </html>
