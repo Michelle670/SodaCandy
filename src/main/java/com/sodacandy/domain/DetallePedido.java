@@ -1,6 +1,7 @@
-
+//==============================================================================
+// IMPORTES
+//==============================================================================
 package com.sodacandy.domain;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -9,7 +10,13 @@ import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.Data;
-
+//==============================================================================
+// CURSO : APLICACIONES WEB Y PATRONES
+// PROF: WILBERT MOLINA
+// ENTREGABLE:PROYECTO
+// GRUPO:6
+// INTEGRANTES:RONALD CALDERON, SHEILYN CORDOBA, MICHELLE GUERRERO, SOFIA LOAIZA
+//==============================================================================
 @Data
 @Entity
 @Table(name="detalle_pedido")

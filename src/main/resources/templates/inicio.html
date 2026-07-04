@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      th:lang="${#locale.language}" lang="es">
+
+    <!-- Reutiliza el head compartido (Bootstrap + Font Awesome + meta) -->
+    <head th:replace="~{general/fragmentos :: head}"></head>
+
+    <body>
+
+        <!-- ============================================================= -->
+        <!-- Clases de color de marca. Es lo unico "extra" a Bootstrap:    -->
+        <!-- la paleta de Soda Candy no viene en Bootstrap por defecto.    -->
+        <!--  Todo lo demas (card, grid, botones, utilidades) es Bootstrap puro.    -->
+        <!-- ============================================================= -->
+        <style>
+            .bg-vino    { background-color:#590202 !important; }
+            .bg-durazno { background-color:#f2b872 !important; }
+            .bg-naranja { background-color:#d96704 !important; }
+            .bg-rojo    { background-color:#b71416 !important; }
+            .bg-verde   { background-color:#1f7a4d !important; }
+            .text-vino  { color:#590202 !important; }
+            .btn-vino   { background-color:#590202; color:#fff; }
+            .btn-vino:hover { background-color:#3d0101; color:#fff; }
+            /* Logo tipo Figma (Lobster ya es dependencia del proyecto) */
+            .sc-logo    { font-family:'Lobster', cursive; font-size:1.6rem; }
+            /* Avatar circular con la inicial del usuario */
+            .sc-avatar  {
+                background:#f2b872; color:#590202; width:32px; height:32px;
+                border-radius:50%; display:inline-flex; align-items:center;
+                justify-content:center; font-weight:700;
+            }
+        </style>
+
+        <!-- ============================================================= -->
+        <!-- BARRA SUPERIOR MINIMA (estilo Figma: logo + usuario + campana) -->
+        <!-- ============================================================= -->
+        <nav class="navbar bg-vino">
+            <div class="container">
+                <!-- Logo: clickeable, regresa a la home -->
+                <a class="navbar-brand text-white sc-logo mb-0" th:href="@{/home}">Soda Candy</a>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Usuario + menu desplegable -->
+                    <div class="dropdown">
+                        <a class="d-flex align-items-center gap-2 text-white text-decoration-none dropdown-toggle"
+                           href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="sc-avatar" th:text="${#strings.substring(nombreUsuario,0,1)}">A</span>
+                            <span>[[#{inicio.hola(${nombreUsuario})}]]</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <!-- TODO seguridad: cuando exista login, esto hara logout real.
+                                 Por ahora "salir" regresa al sitio publico. -->
+                            <li>
+                                <a class="dropdown-item" th:href="@{/}">
+                                    <i class="fa-solid fa-right-from-bracket"></i> [[#{inicio.salir}]]
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- ============================================================= -->
+        <!-- BANNER DE BIENVENIDA                                           -->
+        <!-- ============================================================= -->
+        <section class="bg-durazno">
+            <div class="container py-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="fw-bold text-vino mb-1"
+                            th:text="#{inicio.bienvenida(${nombreUsuario})}">¡Bienvenida, Admin!</h1>
+                        <p class="mb-0 text-vino">[[#{inicio.pregunta}]]</p>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0 text-vino">
+                        <div class="fw-semibold">[[${fecha}]]</div>
+                        <div><i class="fa-regular fa-clock"></i> [[#{inicio.turnoLabel}]] [[${turno}]]</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TARJETAS DE GESTION (grid Bootstrap: 1 / 2 / 3 columnas)       -->
+        <!-- ============================================================= -->
+        <main class="container py-5">
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+
+                <!-- MESAS -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-rojo text-white text-center py-3">
+                            <i class="fa-solid fa-chair fa-lg"></i>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-vino">[[#{inicio.mesas.titulo}]]</h5>
+                            <p class="card-text flex-grow-1">[[#{inicio.mesas.desc}]]</p>
+                            <a th:href="@{/mesa/listado}" class="btn btn-vino w-100">
+                                [[#{inicio.mesas.boton}]] <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COCINA -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-naranja text-white text-center py-3">
+                            <i class="fa-solid fa-utensils fa-lg"></i>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-vino">[[#{inicio.cocina.titulo}]]</h5>
+                            <p class="card-text flex-grow-1">[[#{inicio.cocina.desc}]]</p>
+                            <a th:href="@{/cocina/tablero}" class="btn btn-vino w-100">
+                                [[#{inicio.cocina.boton}]] <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PRODUCTOS -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-vino text-white text-center py-3">
+                            <i class="fa-solid fa-clipboard-list fa-lg"></i>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-vino">[[#{inicio.productos.titulo}]]</h5>
+                            <p class="card-text flex-grow-1">[[#{inicio.productos.desc}]]</p>
+                            <a th:href="@{/producto/listado}" class="btn btn-vino w-100">
+                                [[#{inicio.productos.boton}]] <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CATEGORIAS (fondo durazno claro -> icono en texto oscuro) -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-durazno text-vino text-center py-3">
+                            <i class="fa-solid fa-folder fa-lg"></i>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-vino">[[#{inicio.categorias.titulo}]]</h5>
+                            <p class="card-text flex-grow-1">[[#{inicio.categorias.desc}]]</p>
+                            <a th:href="@{/categoria/listado}" class="btn btn-vino w-100">
+                                [[#{inicio.categorias.boton}]] <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EMPLEADOS -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-vino text-white text-center py-3">
+                            <i class="fa-solid fa-user fa-lg"></i>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-vino">[[#{inicio.empleados.titulo}]]</h5>
+                            <p class="card-text flex-grow-1">[[#{inicio.empleados.desc}]]</p>
+                            <a th:href="@{/usuario/listado}" class="btn btn-vino w-100">
+                                [[#{inicio.empleados.boton}]] <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REPORTES -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-verde text-white text-center py-3">
+                            <i class="fa-solid fa-chart-column fa-lg"></i>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-vino">[[#{inicio.reportes.titulo}]]</h5>
+                            <p class="card-text flex-grow-1">[[#{inicio.reportes.desc}]]</p>
+                            <a th:href="@{/reporte/ventas}" class="btn btn-vino w-100">
+                                [[#{inicio.reportes.boton}]] <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- ============================================================= -->
+        <!-- FOOTER                                                        -->
+        <!-- ============================================================= -->
+        <footer class="bg-vino text-white text-center py-4">
+    <small>Soda Candy &middot; [[#{inicio.footer}]]</small>
+</footer>
+
+    </body>
+</html>

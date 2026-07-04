@@ -1,6 +1,7 @@
-
+//==============================================================================
+// IMPORTES
+//==============================================================================
 package com.sodacandy.controller;
-
 import com.sodacandy.domain.Pedido;
 import com.sodacandy.service.PedidoService;
 import jakarta.validation.Valid;
@@ -15,7 +16,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+//==============================================================================
+// CURSO : APLICACIONES WEB Y PATRONES
+// PROF: WILBERT MOLINA
+// ENTREGABLE:PROYECTO
+// GRUPO:6
+// INTEGRANTES:RONALD CALDERON, SHEILYN CORDOBA, MICHELLE GUERRERO, SOFIA LOAIZA
+//==============================================================================
 @Controller// Anotacion controller
 @RequestMapping("/pedido")// todo lo que se pida bajo /rol lo resuelve este codigo
 public class PedidoController

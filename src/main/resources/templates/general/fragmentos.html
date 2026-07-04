@@ -151,3 +151,67 @@
         </div>
     </div>
 </section>
+
+<!-- Fragmento #5: NAVBAR PUBLICO (bienvenida y menu). Autosuficiente y con
+     resaltado del link activo segun la variable ${seccion} que pasa cada pagina. -->
+<div th:fragment="headerPublico">
+
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Righteous&display=swap" rel="stylesheet"/>
+
+    <style>
+        .nav-publico            { background:#590202; }
+        .nav-publico .brand-pub { font-family:'Lobster', cursive; font-size:1.9rem; color:#fff; letter-spacing:.5px; }
+        .nav-publico .nav-link  { font-family:'Righteous', system-ui; color:#fff; }
+        .nav-publico .nav-link:hover { color:#f2b872; }
+        /* Link activo: subrayado durazno, igual que la bienvenida */
+        .nav-publico .nav-link.activo { color:#f2b872; border-bottom:2px solid #f2b872; }
+        .nav-publico .btn-staff-pub {
+            background:#d96704; color:#fff; border-radius:9999px; padding:.4rem 1.2rem;
+            font-family:'Righteous', system-ui;
+        }
+        .nav-publico .btn-staff-pub:hover { background:#c25a03; color:#fff; }
+    </style>
+
+    <nav class="nav-publico navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand brand-pub" th:href="@{/}">[[#{aplicacion.titulo}]]</a>
+
+            <button class="navbar-toggler bg-light" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navPublico" aria-controls="navPublico"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse justify-content-between" id="navPublico">
+                <ul class="navbar-nav">
+                    <li class="nav-item px-2">
+                        <a class="nav-link" th:classappend="${seccion == 'inicio'} ? 'activo' : ''"
+                           th:href="@{/}">Inicio</a></li>
+                    <li class="nav-item px-2">
+                        <a class="nav-link" th:classappend="${seccion == 'menu'} ? 'activo' : ''"
+                           th:href="@{/menu/listado}">[[#{plantilla.menu}]]</a></li>
+                    <li class="nav-item px-2">
+                        <a class="nav-link" th:classappend="${seccion == 'nosotros'} ? 'activo' : ''"
+                           th:href="@{/#nosotros}">Nosotros</a></li>
+                    <li class="nav-item px-2">
+                        <a class="nav-link" th:classappend="${seccion == 'contacto'} ? 'activo' : ''"
+                           th:href="@{/#visitanos}">Contacto</a></li>
+                </ul>
+                <ul class="navbar-nav align-items-lg-center">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                           role="button" aria-expanded="false">[[#{plantilla.idioma}]]</a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" th:href="@{/(lang=es)}">Español</a></li>
+                            <li><a class="dropdown-item" th:href="@{/(lang=en)}">English</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-sm btn-staff-pub" th:href="@{/home}">
+                            <i class="fa-solid fa-lock me-1"></i>[[#{plantilla.accesoStaff}]]</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>

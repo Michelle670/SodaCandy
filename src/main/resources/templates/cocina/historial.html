@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      th:lang="${#locale.language}" lang="es">
+<head th:replace="~{general/fragmentos :: head}"></head>
+<body class="d-flex flex-column min-vh-100">
+
+    <div th:replace="~{staff/fragmentos :: headerStaff}"></div>
+
+    <div class="d-flex flex-grow-1">
+        <div th:replace="~{staff/fragmentos :: sidebarStaff}"></div>
+
+        <main class="flex-grow-1 p-4">
+
+            <style>
+                .cocina-titulo { color:#590202; font-weight:700; }
+                .pedido-card   { border:none; border-radius:10px; overflow:hidden;
+                                 box-shadow:0 2px 10px rgba(0,0,0,.08); }
+                .pedido-header { background:#20603f; color:#fff; padding:1rem 1.25rem; }
+                .pedido-header .mesa { font-size:.78rem; letter-spacing:.6px;
+                                       opacity:.85; text-transform:uppercase; }
+                .pedido-item   { padding:.55rem 0; border-bottom:1px solid #eee; }
+                .pedido-item:last-child { border-bottom:none; }
+                .pedido-item .nota { color:#b71416; font-size:.82rem; }
+                .btn-volver    { border:1px solid #590202; color:#590202; }
+                .btn-volver:hover { background:#590202; color:#fff; }
+            </style>
+
+            <div class="d-flex justify-content-between align-items-start flex-wrap mb-4">
+                <div>
+                    <h2 class="cocina-titulo mb-1">
+                        [[#{cocina.historial.titulo}]] ([[${totalPedidos}]])
+                    </h2>
+                    <p class="text-muted mb-0">[[#{cocina.historial.subtitulo}]]</p>
+                </div>
+                <a th:href="@{/cocina/tablero}" class="btn btn-volver mt-2 mt-md-0">
+                    <i class="fa-solid fa-arrow-left"></i> [[#{cocina.volverTablero}]]
+                </a>
+            </div>
+
+            <div th:if="${pedidos.isEmpty()}" class="alert alert-light border text-center py-5">
+                <p class="mb-0 text-muted">[[#{cocina.sinListos}]]</p>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                <div class="col" th:each="pedido : ${pedidos}">
+                    <div class="card pedido-card h-100">
+                        <div class="pedido-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold fs-5">[[#{cocina.pedido}]] #[[${pedido.idPedido}]]</div>
+                                <div class="mesa" th:if="${pedido.idMesa != null}">
+                                    [[#{cocina.mesa}]] [[${pedido.idMesa}]]
+                                </div>
+                                <div class="mesa" th:unless="${pedido.idMesa != null}">
+                                    [[#{cocina.paraLlevar}]]
+                                </div>
+                            </div>
+                            <span class="badge bg-light text-success">
+                                <i class="fa-solid fa-check"></i> [[#{cocina.badge.listo}]]
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="pedido-item" th:each="linea : ${pedido.lineas}">
+                                <div><span class="fw-semibold">[[${linea.cantidad}]] ×</span> [[${linea.nombreProducto}]]</div>
+                                <div class="nota" th:if="${linea.nota != null and !linea.nota.isEmpty()}">
+                                    <i class="fa-solid fa-circle-info"></i> [[${linea.nota}]]
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <div th:replace="~{staff/fragmentos :: footerStaff}"></div>
+
+</body>
+</html>
