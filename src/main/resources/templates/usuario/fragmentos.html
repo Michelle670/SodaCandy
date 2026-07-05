@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"/>
+
+    <body>
+        <!-- ============================================================
+             FRAGMENTO 1  Boton + Modal AGREGAR empleado (HU-02)
+             ============================================================ -->
+        <section th:fragment="agregar">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="sc-titulo mb-1">[[#{usuario.listado}]]</h2>
+                    <p class="text-muted mb-0">[[#{usuario.subtitulo}]]</p>
+                </div>
+                <button type="button" class="btn sc-btn-naranja"
+                        data-bs-toggle="modal" data-bs-target="#agregarUsuarioModal">
+                    <i class="fa-solid fa-plus"></i> [[#{usuario.agregar}]]
+                </button>
+            </div>
+
+            <!-- Modal agregar -->
+            <div class="modal fade" id="agregarUsuarioModal" tabindex="-1"
+                 aria-labelledby="agregarUsuarioLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h1 class="modal-title fs-5" id="agregarUsuarioLabel">
+                                <i class="fa-solid fa-user-plus"></i> [[#{usuario.agregar}]]
+                            </h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form th:action="@{/usuario/guardar}" class="was-validated" method="post">
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>[[#{usuario.nombre}]]</label>
+                                        <input type="text" name="nombre" class="form-control"
+                                               maxlength="20" required="true"/>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>[[#{usuario.apellidos}]]</label>
+                                        <input type="text" name="apellidos" class="form-control"
+                                               maxlength="30" required="true"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>[[#{usuario.username}]]</label>
+                                        <input type="text" name="username" class="form-control"
+                                               maxlength="30" required="true"/>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>[[#{usuario.password}]]</label>
+                                        <input type="password" name="password" class="form-control"
+                                               maxlength="512" required="true"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label>[[#{usuario.correo}]]</label>
+                                        <input type="email" name="correo" class="form-control"
+                                               maxlength="75"/>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label>[[#{usuario.telefono}]]</label>
+                                        <input type="text" name="telefono" class="form-control"
+                                               maxlength="25"/>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label>[[#{usuario.rutaImagen}]]</label>
+                                    <input type="text" name="rutaImagen" class="form-control"
+                                           maxlength="1024" placeholder="https://..."/>
+                                </div>
+                                <div class="mb-3">
+                                    <label>[[#{usuario.activo}]]</label>
+                                    <input type="checkbox" name="activo" class="form-check-input" checked="checked"/>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-floppy-disk"></i> [[#{accion.guardar}]]
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             FRAGMENTO 2  Tabla de empleados (HU-02)
+             ============================================================ -->
+        <section th:fragment="listado" class="p-3">
+            <div class="row p-3">
+                <div class="col-md-9">
+                    <div class="card p-2">
+                        <div class="card-header"><h4>[[#{usuario.listado}]]</h4></div>
+                        <div class="card-body">
+                            <div th:if="${usuarios != null and !usuarios.empty}">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>[[#{usuario.nombre}]]</th>
+                                            <th>[[#{usuario.username}]]</th>
+                                            <th>[[#{usuario.correo}]]</th>
+                                            <th>[[#{usuario.rol}]]</th>
+                                            <th>[[#{usuario.estado}]]</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="u : ${usuarios}">
+                                            <td>[[${u.idUsuario}]]</td>
+                                            <td>[[${u.nombre}]] [[${u.apellidos}]]</td>
+                                            <td>[[${u.username}]]</td>
+                                            <td>[[${u.correo}]]</td>
+                                            <!-- Rol: por ahora informativo. Se asignara con Spring Security -->
+                                            <td><span class="badge bg-secondary">[[#{usuario.sinRol}]]</span></td>
+                                            <!-- HU-02: badge de estado activo/inactivo -->
+                                            <td>
+                                                <span th:if="${u.activo}" class="badge bg-success">
+                                                    <i class="fa-solid fa-check"></i> [[#{usuario.activoBadge}]]
+                                                </span>
+                                                <span th:unless="${u.activo}" class="badge bg-secondary">
+                                                    <i class="fa-solid fa-ban"></i> [[#{usuario.inactivoBadge}]]
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <!-- HU-02: activar / desactivar (no eliminar) -->
+                                                <form th:if="${u.activo}" th:action="@{/usuario/desactivar}"
+                                                      method="post" style="display:inline;">
+                                                    <input type="hidden" name="idUsuario" th:value="${u.idUsuario}"/>
+                                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                                        <i class="fa-solid fa-user-slash"></i> [[#{usuario.desactivar}]]
+                                                    </button>
+                                                </form>
+                                                <form th:unless="${u.activo}" th:action="@{/usuario/activar}"
+                                                      method="post" style="display:inline;">
+                                                    <input type="hidden" name="idUsuario" th:value="${u.idUsuario}"/>
+                                                    <button type="submit" class="btn btn-outline-success btn-sm">
+                                                        <i class="fa-solid fa-user-check"></i> [[#{usuario.activar}]]
+                                                    </button>
+                                                </form>
+                                                <a th:href="@{/usuario/modificar/}+${u.idUsuario}"
+                                                   class="btn btn-warning btn-sm">
+                                                    <i class="fas fa-pencil-alt"></i> [[#{accion.actualizar}]]
+                                                </a>
+                                                <button type="button" class="btn btn-danger btn-sm"
+                                                        data-bs-toggle="modal" data-bs-target="#confirmModal"
+                                                        th:data-bs-id="${u.idUsuario}"
+                                                        th:data-bs-descripcion="${u.nombre} + ' ' + ${u.apellidos}">
+                                                    <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-center p-2" th:if="${usuarios == null or usuarios.empty}">
+                                <span>[[#{lista.vacia}]]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center bg-success text-white mb-3">
+                        <div class="card-body">
+                            <h3>[[#{usuario.total}]]</h3>
+                            <h4 class="fs-2"><i class="fas fa-users"></i> [[${totalUsuarios}]]</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                .sc-titulo      {
+                    font-family:'Lobster', cursive;
+                    color:#590202;
+                }
+                .sc-btn-naranja {
+                    background-color:#d96704;
+                    color:#fff;
+                    border:none;
+                }
+                .sc-btn-naranja:hover {
+                    background-color:#b85503;
+                    color:#fff;
+                }
+            </style>
+        </section>
+
+        <!-- ============================================================
+             FRAGMENTO 3  Formulario editar empleado (modifica.html)
+             ============================================================ -->
+        <section th:fragment="editar">
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-8">
+                    <form method="POST" th:action="@{/usuario/guardar}"
+                          th:object="${usuario}" class="was-validated">
+                        <input type="hidden" name="idUsuario" th:field="*{idUsuario}"/>
+                        <div class="row py-4 mb-4 bg-light">
+                            <div class="col-md-4 d-grid">
+                                <a th:href="@{/usuario/listado}" class="btn btn-primary">
+                                    <i class="fas fa-arrow-left"></i> [[#{accion.regresar}]]
+                                </a>
+                            </div>
+                            <div class="col-md-4 d-grid">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check"></i> [[#{accion.guardar}]]
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-header"><h4>[[#{accion.actualizar}]] [[#{usuario.usuario}]]</h4></div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label>[[#{usuario.nombre}]]</label>
+                                                <input type="text" class="form-control" name="nombre"
+                                                       th:field="*{nombre}" maxlength="20" required="true"/>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label>[[#{usuario.apellidos}]]</label>
+                                                <input type="text" class="form-control" name="apellidos"
+                                                       th:field="*{apellidos}" maxlength="30" required="true"/>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label>[[#{usuario.username}]]</label>
+                                                <input type="text" class="form-control" name="username"
+                                                       th:field="*{username}" maxlength="30" required="true"/>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label>[[#{usuario.password}]]</label>
+                                                <input type="password" class="form-control" name="password"
+                                                       th:field="*{password}" maxlength="512" required="true"/>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label>[[#{usuario.correo}]]</label>
+                                                <input type="email" class="form-control" name="correo"
+                                                       th:field="*{correo}" maxlength="75"/>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label>[[#{usuario.telefono}]]</label>
+                                                <input type="text" class="form-control" name="telefono"
+                                                       th:field="*{telefono}" maxlength="25"/>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>[[#{usuario.rutaImagen}]]</label>
+                                            <input type="text" class="form-control" name="rutaImagen"
+                                                   th:field="*{rutaImagen}" maxlength="1024"/>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>[[#{usuario.activo}]]</label>
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="activo" id="activo" th:field="*{activo}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             FRAGMENTO 4  Modal confirmar eliminar empleado
+             ============================================================ -->
+        <section th:fragment="confirmarEliminar">
+            <div class="modal fade" id="confirmModal" tabindex="-1"
+                 aria-labelledby="confirmModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form th:action="@{/usuario/eliminar}" method="post">
+                            <input type="hidden" name="idUsuario" id="modalId"/>
+                            <div class="modal-header bg-warning text-white">
+                                <h5 class="modal-title" id="confirmModalLabel">
+                                    <i class="fa-solid fa-circle-radiation"></i> [[#{accion.confirmar}]]
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>[[#{accion.confirmar.texto1}]] <span id="modalDescripcion"></span>?</p>
+                                <h6>[[#{accion.confirmar.texto2}]]</h6>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </body>
+</html>
