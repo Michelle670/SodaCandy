@@ -1,5 +1,7 @@
+//==============================================================================
+// IMPORTES
+//==============================================================================
 package com.sodacandy.controller;
-
 import com.sodacandy.domain.Categoria;
 import com.sodacandy.service.CategoriaService;
 import jakarta.validation.Valid;
@@ -14,7 +16,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+//==============================================================================
+// CURSO : APLICACIONES WEB Y PATRONES
+// PROF: WILBERT MOLINA
+// ENTREGABLE:PROYECTO
+// GRUPO:6
+// INTEGRANTES:RONALD CALDERON, SHEILYN CORDOBA, MICHELLE GUERRERO, SOFIA LOAIZA
+//==============================================================================
 @Controller// Anotacion controller
 @RequestMapping("/categoria")
 public class CategoriaController {
@@ -33,6 +41,7 @@ public class CategoriaController {
         var categorias = categoriaService.getCategorias(false);
         model.addAttribute("categorias", categorias);
         model.addAttribute("totalCategorias", categorias.size());
+        model.addAttribute("modulo", "categorias");
         return "/categoria/listado";
     }
 

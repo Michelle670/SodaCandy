@@ -1,15 +1,28 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-    <head th:replace="~{general/fragmentos :: head}"></head>
-    <body>
-        <header th:replace="~{general/fragmentos :: header}"></header>
+      xmlns:th="http://www.thymeleaf.org"
+      th:lang="${#locale.language}" lang="es">
+<head th:replace="~{general/fragmentos :: head}"></head>
+<body class="d-flex flex-column min-vh-100">
 
-        <section th:replace="~{producto/fragmentos :: agregar}"/>
-        <section th:replace="~{producto/fragmentos :: listado}"/>
-        <section th:replace="~{producto/fragmentos :: confirmarEliminar}"/>
-        <section th:replace="~{general/fragmentos :: mostrarToast}"/>
+    <!-- Shell de staff: barra superior -->
+    <div th:replace="~{staff/fragmentos :: headerStaff}"></div>
 
-        <footer th:replace="~{general/fragmentos :: footer}"></footer>
-    </body>
+    <!-- Fila: sidebar + contenido -->
+    <div class="d-flex flex-grow-1">
+        <div th:replace="~{staff/fragmentos :: sidebarStaff}"></div>
+
+        <main class="flex-grow-1 p-4">
+            <!-- CONTENIDO DE PRODUCTO -->
+            <section th:replace="~{producto/fragmentos :: agregar}"/>
+            <section th:replace="~{producto/fragmentos :: listado}"/>
+            <section th:replace="~{producto/fragmentos :: confirmarEliminar}"/>
+            <section th:replace="~{general/fragmentos :: mostrarToast}"/>
+        </main>
+    </div>
+
+    <!-- Shell de staff: footer -->
+    <div th:replace="~{staff/fragmentos :: footerStaff}"></div>
+
+</body>
 </html>

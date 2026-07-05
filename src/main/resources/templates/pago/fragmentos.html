@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+    <head th:replace="~{general/fragmentos :: head}"/>
+
+    <body>
+
+        <!-- ============================================================= -->
+        <!-- FRAGMENTO 1: Agregar pago (boton + ventana modal)             -->
+        <!-- ============================================================= -->
+        <section th:fragment="agregar">
+            <div class='row py-4 mb-2 bg-light'>
+                <div class='col-md-1'></div>
+                <div class='col-md-3'>
+                    <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
+                    <button type="button" class="btn btn-primary"
+                            data-bs-toggle="modal" data-bs-target="#agregarPagoModal">
+                        <i class="fa-solid fa-plus"></i> [[#{pago.agregar}]]</button>
+                </div>
+            </div>
+
+            <div class="modal fade" id="agregarPagoModal" tabindex="-1"
+                 aria-labelledby="agregarPagoLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h1 class="modal-title fs-5" id="agregarPagoLabel">
+                                <i class="fa-solid fa-cash-register"></i> [[#{pago.agregar}]]</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form th:action='@{/pago/guardar}' th:object='${pago}'
+                              class='was-validated' method='post'>
+                            <div class="modal-body">
+                                <!-- Pedido a cobrar -->
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{pago.idPedido}]]</label>
+                                    <input type="number" class="form-control"
+                                           th:field="*{idPedido}" min="1" required/>
+                                </div>
+                                <!-- Monto cobrado -->
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{pago.monto}]]</label>
+                                    <input type="number" step="0.01" min="0.01"
+                                           class="form-control" th:field="*{monto}" required/>
+                                </div>
+                                <!-- Metodo de pago (enum) -->
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{pago.metodo}]]</label>
+                                    <select class="form-select" th:field="*{metodo}" required>
+                                        <option value="">[[#{pago.metodo.seleccione}]]</option>
+                                        <option th:each="m : ${metodos}"
+                                                th:value="${m}" th:text="${m}">EFECTIVO</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-floppy-disk"></i> [[#{accion.guardar}]]</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- FRAGMENTO 2: Listado de pagos (tabla)                         -->
+        <!-- ============================================================= -->
+        <section th:fragment="listado">
+            <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-10">
+                    <h3 class="mb-3">
+                        <i class="fa-solid fa-money-bill-wave"></i> [[#{pago.listado}]]
+                        <span class="badge bg-secondary">[[${totalPagos}]]</span>
+                    </h3>
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>[[#{pago.idPago}]]</th>
+                                <th>[[#{pago.idPedido}]]</th>
+                                <th>[[#{pago.monto}]]</th>
+                                <th>[[#{pago.metodo}]]</th>
+                                <th>[[#{pago.fecha}]]</th>
+                                <th class="text-center">[[#{accion.acciones}]]</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="pago : ${pagos}">
+                                <td>[[${pago.idPago}]]</td>
+                                <td>[[${pago.idPedido}]]</td>
+                                <td>&#8353;[[${#numbers.formatDecimal(pago.monto, 1, 'COMMA', 2, 'POINT')}]]</td>
+                                <td>[[${pago.metodo}]]</td>
+                                <td th:text="${pago.fecha != null} ? ${#temporals.format(pago.fecha, 'dd/MM/yyyy HH:mm')} : ''"></td>
+                                <td class="text-center">
+                                    <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
+                                    <a th:href="@{/pago/modificar/{id}(id=${pago.idPago})}"
+                                       class="btn btn-warning btn-sm">
+                                        <i class="fa-solid fa-pen"></i></a>
+                                    <button type="button" class="btn btn-danger btn-sm"
+                                            data-bs-toggle="modal" data-bs-target="#eliminarPagoModal"
+                                            th:attr="data-id=${pago.idPago}">
+                                        <i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- FRAGMENTO 3: Editar pago (formulario, va en modifica.html)    -->
+        <!-- ============================================================= -->
+        <section th:fragment="editar">
+            <div class="row py-4">
+                <div class="col-md-3"></div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <i class="fa-solid fa-pen"></i> [[#{pago.editar}]]
+                        </div>
+                        <div class="card-body">
+                            <form th:action='@{/pago/guardar}' th:object='${pago}'
+                                  class='was-validated' method='post'>
+                                <!-- idPago viaja oculto para que el save sea UPDATE -->
+                                <input type="hidden" th:field="*{idPago}"/>
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{pago.idPedido}]]</label>
+                                    <input type="number" class="form-control"
+                                           th:field="*{idPedido}" min="1" required/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{pago.monto}]]</label>
+                                    <input type="number" step="0.01" min="0.01"
+                                           class="form-control" th:field="*{monto}" required/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{pago.metodo}]]</label>
+                                    <select class="form-select" th:field="*{metodo}" required>
+                                        <option value="">[[#{pago.metodo.seleccione}]]</option>
+                                        <option th:each="m : ${metodos}"
+                                                th:value="${m}" th:text="${m}">EFECTIVO</option>
+                                    </select>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <a th:href="@{/pago/listado}" class="btn btn-secondary">
+                                        <i class="fa-solid fa-arrow-left"></i> [[#{accion.regresar}]]</a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa-solid fa-floppy-disk"></i> [[#{accion.guardar}]]</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- FRAGMENTO 4: Confirmar eliminacion (ventana modal)            -->
+        <!-- ============================================================= -->
+        <section th:fragment="confirmarEliminar">
+            <div class="modal fade" id="eliminarPagoModal" tabindex="-1"
+                 aria-labelledby="eliminarPagoLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h1 class="modal-title fs-5" id="eliminarPagoLabel">
+                                <i class="fa-solid fa-triangle-exclamation"></i> [[#{pago.eliminar.titulo}]]</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form th:action='@{/pago/eliminar}' method='post'>
+                            <div class="modal-body">
+                                <p>[[#{pago.eliminar.pregunta}]]</p>
+                                <!-- rutinas.js (o el script de listado.html) copia el data-id aqui -->
+                                <input type="hidden" name="idPago" id="idPagoEliminar"/>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </body>
+</html>

@@ -1,22 +1,434 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
+      xmlns:th="http://www.thymeleaf.org"
+      th:lang="${#locale.language}" lang="es">
+
+    <!-- Reutiliza el head compartido (Bootstrap + Font Awesome + meta) -->
     <head th:replace="~{general/fragmentos :: head}"></head>
-    <body>
-        <header th:replace="~{general/fragmentos :: header}"></header>
 
-        <section class="container py-5">
-            <div class="row justify-content-center text-center">
-                <div class="col-md-8">
-                    <h1 class="display-5" style="color: var(--soda-vino);">
-                        [[#{index.bienvenida}]]</h1>
-                    <p class="lead text-muted">[[#{index.intro}]]</p>
-                    <a th:href="@{/menu/listado}" class="btn btn-soda-naranja btn-lg mt-2">
-                        <i class="fa-solid fa-book-open"></i> [[#{plantilla.menu}]]</a>
-                </div>
-            </div>
-        </section>
+    <body class="sc-landing">
 
-        <footer th:replace="~{general/fragmentos :: footer}"></footer>
-    </body>
-</html>
+        <!-- ============================================================= -->
+        <!-- Fuentes de Google + estilos de la landing.   -->
+        <!-- Van scoped a .sc-landing para NO pisar el estilo de las demas -->
+        <!-- pantallas del equipo.                                         -->
+        <!-- ============================================================= -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Carter+One&family=Righteous&family=Outfit:wght@600&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+                    <style>
+                        /* ===== Paleta oficial (tomada del Figma) ===== */
+                        .sc-landing {
+                            --vino:#590202;
+                            --durazno:#f2b872;
+                            --naranja:#d96704;
+                            --cafe:#57423f;
+                            --rojo:#b71416;
+                            --rosa:#ffe9e6;
+                            --crema:#fff8f7;
+                            --marron:#330000;
+                            background: var(--crema);
+                            font-family: 'Nunito Sans', sans-serif;
+                            color: var(--cafe);
+                        }
+                        /* Tipos por rol, igual que en Figma */
+                        .sc-landing .ff-logo    {
+                            font-family:'Lobster', cursive;
+                        }
+                        .sc-landing .ff-titulo  {
+                            font-family:'Carter One', system-ui;
+                        }
+                        .sc-landing .ff-nav     {
+                            font-family:'Righteous', system-ui;
+                        }
+                        .sc-landing .ff-boton   {
+                            font-family:'Outfit', sans-serif;
+                            font-weight:600;
+                        }
+
+                        
+                        /* ===== Hero ===== */
+                        .sc-landing .sc-hero {
+                            min-height:600px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            text-align:center;
+                            color:#fff;
+                            position:relative;
+                            /* El overlay vino al 50% + la foto. Si aun no pones la imagen,
+                               igual se ve el degradado vino de fondo. */
+                            background:
+                                linear-gradient(rgba(89,2,2,.5), rgba(89,2,2,.5)),
+                                var(--vino) url('/img/hero-gallopinto.jpeg') center/cover no-repeat;
+                        }
+                        .sc-landing .sc-hero h1 {
+                            font-family:'Lobster',cursive;
+                            font-size:4.5rem;
+                            margin-bottom:.25rem;
+                        }
+                        .sc-landing .sc-hero .sub {
+                            font-family:'Carter One',system-ui;
+                            color:var(--durazno);
+                            font-size:2rem;
+                        }
+                        .sc-landing .sc-hero .lead {
+                            font-size:1.25rem;
+                            opacity:.9;
+                            max-width:672px;
+                            margin:1rem auto 0;
+                        }
+                        .sc-landing .btn-hero-primary {
+                            background:var(--naranja);
+                            color:#fff;
+                            border-radius:9999px;
+                            padding:1rem 3rem;
+                            font-family:'Outfit',sans-serif;
+                            font-weight:600;
+                            font-size:1.125rem;
+                        }
+                        .sc-landing .btn-hero-primary:hover {
+                            background:#c25a03;
+                            color:#fff;
+                        }
+                        .sc-landing .btn-hero-ghost {
+                            background:transparent;
+                            color:#fff;
+                            border:2px solid #fff;
+                            border-radius:9999px;
+                            padding:1rem 3rem;
+                            font-family:'Outfit',sans-serif;
+                            font-weight:600;
+                            font-size:1.125rem;
+                        }
+                        .sc-landing .btn-hero-ghost:hover {
+                            background:#fff;
+                            color:var(--vino);
+                        }
+
+                        /* ===== Secciones ===== */
+                        .sc-landing .sc-h2 {
+                            font-family:'Carter One',system-ui;
+                            color:var(--vino);
+                            font-size:2.25rem;
+                        }
+                        .sc-landing .sec-tradicion {
+                            background:#fff;
+                            padding:5rem 1rem;
+                        }
+                        .sc-landing .sec-tradicion p {
+                            font-size:1.25rem;
+                            max-width:768px;
+                            margin:0 auto;
+                        }
+                        .sc-landing .sec-tradicion .icono {
+                            color:var(--naranja);
+                            font-size:2rem;
+                            margin-top:2rem;
+                        }
+
+                        /* ===== Tarjetas de categorias ===== */
+                        .sc-landing .sec-categorias {
+                            background:var(--durazno);
+                            padding:5rem 1rem;
+                        }
+                        .sc-landing .cat-card {
+                            background:#fff;
+                            border-radius:12px;
+                            overflow:hidden;
+                            box-shadow:0 4px 12px rgba(89,2,2,.08);
+                            height:100%;
+                            text-decoration:none;
+                            transition:transform .15s ease, box-shadow .15s ease;
+                        }
+                        .sc-landing .cat-card:hover {
+                            transform:translateY(-4px);
+                            box-shadow:0 8px 20px rgba(89,2,2,.15);
+                        }
+                        .sc-landing .cat-card .cat-img {
+                            height:256px;
+                            background:var(--durazno) center/cover no-repeat;
+                        }
+                        .sc-landing .cat-card .cat-img img {
+                            width:100%;
+                            height:256px;
+                            object-fit:cover;
+                            display:block;
+                        }
+                        .sc-landing .cat-card .cat-body {
+                            padding:2rem;
+                        }
+                        .sc-landing .cat-card h3 {
+                            font-family:'Carter One',system-ui;
+                            color:var(--marron);
+                            font-size:1.5rem;
+                        }
+                        .sc-landing .cat-card .cat-link {
+                            color:var(--rojo);
+                            font-family:'Outfit',sans-serif;
+                            font-weight:600;
+                        }
+
+                        /* ===== Visitanos ===== */
+                        .sc-landing .sec-visitanos {
+                            background:#fff;
+                            padding:5rem 1rem;
+                        }
+                        .sc-landing .info-card {
+                            background:var(--rosa);
+                            border-radius:12px;
+                            padding:1.5rem;
+                            display:flex;
+                            gap:1rem;
+                            align-items:flex-start;
+                        }
+                        .sc-landing .info-card .info-ico {
+                            color:var(--naranja);
+                            font-size:1.25rem;
+                            margin-top:.2rem;
+                        }
+                        .sc-landing .info-card h4 {
+                            font-family:'Outfit',sans-serif;
+                            font-weight:600;
+                            color:var(--marron);
+                            font-size:1.125rem;
+                            margin:0;
+                        }
+                        .sc-landing .info-card .nota {
+                            font-style:italic;
+                            font-size:.875rem;
+                        }
+                        .sc-landing .mapa-box {
+                            background:var(--durazno);
+                            border:4px solid #fff;
+                            border-radius:16px;
+                            min-height:384px;
+                            display:flex;
+                            flex-direction:column;
+                            align-items:center;
+                            justify-content:center;
+                            box-shadow:0 10px 15px -3px rgba(0,0,0,.1);
+                        }
+                        .sc-landing .mapa-box .fa-location-dot {
+                            color:var(--naranja);
+                            font-size:3.5rem;
+                        }
+                        .sc-landing .mapa-box .mapa-txt {
+                            font-family:'Carter One',system-ui;
+                            color:var(--marron);
+                            margin-top:1rem;
+                        }
+
+                        /* ===== Footer ===== */
+                        .sc-landing .sc-footer {
+                            background:var(--vino);
+                            color:#fff;
+                            padding:4rem 1rem 2rem;
+                        }
+                        .sc-landing .sc-footer .brand {
+                            font-family:'Lobster',cursive;
+                            font-size:2.5rem;
+                        }
+                        .sc-landing .sc-footer a {
+                            color:#fff;
+                            opacity:.8;
+                            text-decoration:none;
+                        }
+                        .sc-landing .sc-footer a:hover {
+                            opacity:1;
+                        }
+                        .sc-landing .sc-footer .legal-title {
+                            color:var(--rosa);
+                            font-size:.75rem;
+                            letter-spacing:.6px;
+                            text-transform:uppercase;
+                        }
+                        .sc-landing .sc-footer .copy {
+                            border-top:1px solid rgba(255,255,255,.1);
+                            opacity:.6;
+                        }
+
+                        @media (max-width: 768px) {
+                            .sc-landing .sc-hero h1 {
+                                font-size:3rem;
+                            }
+                            .sc-landing .sc-hero .sub {
+                                font-size:1.5rem;
+                            }
+                        }
+                    </style>
+
+                    <!-- ============================================================= -->
+                    <!-- NAVBAR PUBLICO (Inicio / Menu / Nosotros / Contacto)          -->
+                    <!-- OJO: este es el nav del sitio PUBLICO, distinto al de staff.  -->
+                    <!-- ============================================================= -->
+                    <div th:with="seccion='inicio'">
+                        <header th:replace="~{general/fragmentos :: headerPublico}"></header>
+                    </div>
+                   
+
+                    <!-- ============================================================= -->
+                    <!-- HERO                                                          -->
+                    <!-- ============================================================= -->
+                    <header class="sc-hero">
+                        <div class="container px-4" style="max-width:896px;">
+                            <h1>Soda Candy</h1>
+                            <p class="sub mb-2">[[#{index.hero.subtitulo}]]</p>
+                            <p class="lead">[[#{index.hero.desc}]]</p>
+                            <div class="d-flex gap-3 justify-content-center flex-wrap pt-4">
+                                <a class="btn-hero-primary" th:href="@{/menu/listado}">[[#{index.hero.verMenu}]]</a>
+                                <a class="btn-hero-ghost" th:href="@{#visitanos}">[[#{index.hero.comoLlegar}]]</a>
+                            </div>
+                        </div>
+                    </header>
+
+                    <!-- ============================================================= -->
+                    <!-- NUESTRA TRADICION                                             -->
+                    <!-- ============================================================= -->
+                    <section id="nosotros" class="sec-tradicion text-center">
+                        <div class="container" style="max-width:1200px;">
+                            <h2 class="sc-h2 mb-4">[[#{index.tradicion.titulo}]]</h2>
+                            <p>[[#{index.tradicion.texto}]]</p>
+                            <div class="icono"><i class="fa-solid fa-utensils"></i></div>
+                        </div>
+                    </section>
+
+                    <!-- ============================================================= -->
+                    <!-- CATEGORIAS (3 tarjetas)                                       -->
+                    <!-- Cambia las imagenes en /static/img/.   -->
+                    <!-- ============================================================= -->
+                    <section class="sec-categorias">
+                        <div class="container" style="max-width:1200px;">
+                            <div class="row g-4">
+
+                                <!-- Platos Tipicos -->
+                                <div class="col-md-4">
+                                    <a class="cat-card d-block" th:href="@{/menu/listado}">
+                                        <div class="cat-img">
+                                            <img th:src="@{/img/platos-tipicos.jpeg}" alt="Platos Típicos"
+                                                 onerror="this.style.display='none'"/>
+                                        </div>
+                                        <div class="cat-body">
+                                            <h3>[[#{index.card.platos.titulo}]]</h3>
+                                            <p class="mb-2">[[#{index.card.platos.desc}]]</p>
+                                            <span class="cat-link">[[#{index.card.platos.link}]] <i class="fa-solid fa-arrow-right"></i></span>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- Bebidas -->
+                                <div class="col-md-4">
+                                    <a class="cat-card d-block" th:href="@{/menu/listado}">
+                                        <div class="cat-img">
+                                            <img th:src="@{/img/bebidas.jpeg}" alt="Bebidas"
+                                                 onerror="this.style.display='none'"/>
+                                        </div>
+                                        <div class="cat-body">
+                                            <h3>[[#{index.card.bebidas.titulo}]]</h3>
+                                            <p class="mb-2">[[#{index.card.bebidas.desc}]]</p>
+                                            <span class="cat-link">[[#{index.card.bebidas.link}]] <i class="fa-solid fa-arrow-right"></i></span>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- Postres Caseros -->
+                                <div class="col-md-4">
+                                    <a class="cat-card d-block" th:href="@{/menu/listado}">
+                                        <div class="cat-img">
+                                            <img th:src="@{/img/postres.jpeg}" alt="Postres Caseros"
+                                                 onerror="this.style.display='none'"/>
+                                        </div>
+                                        <div class="cat-body">
+                                            <h3>[[#{index.card.postres.titulo}]]</h3>
+                                            <p class="mb-2">[[#{index.card.postres.desc}]]</p>
+                                            <span class="cat-link">[[#{index.card.postres.link}]] <i class="fa-solid fa-arrow-right"></i></span>
+                                        </div>
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ============================================================= -->
+                    <!-- VISITANOS                                                     -->
+                    <!-- ============================================================= -->
+                    <section id="visitanos" class="sec-visitanos">
+                        <div class="container" style="max-width:1200px;">
+                            <h2 class="sc-h2 text-center mb-5">[[#{index.visitanos.titulo}]]</h2>
+                            <div class="row g-4 align-items-center">
+
+                                <!-- Columna izquierda: tarjetas de info -->
+                                <div class="col-lg-6 d-flex flex-column gap-4">
+                                    <div class="info-card">
+                                        <i class="fa-solid fa-location-dot info-ico"></i>
+                                        <div>
+                                            <h4>[[#{index.direccion.titulo}]]</h4>
+                                            <div>[[#{index.direccion.valor}]]</div>
+                                            <div class="nota">[[#{index.direccion.nota}]]</div>
+                                        </div>
+                                    </div>
+                                    <div class="info-card">
+                                        <i class="fa-solid fa-clock info-ico"></i>
+                                        <div>
+                                            <h4>[[#{index.horario.titulo}]]</h4>
+                                            <div>[[#{index.horario.valor}]]</div>
+                                            <div class="nota">[[#{index.horario.nota}]]</div>
+                                        </div>
+                                    </div>
+                                    <div class="info-card">
+                                        <i class="fa-solid fa-phone info-ico"></i>
+                                        <div>
+                                            <h4>[[#{index.contacto.titulo}]]</h4>
+                                            <div>[[#{index.contacto.valor}]]</div>
+                                            <div class="nota">[[#{index.contacto.nota}]]</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Columna derecha: placeholder de mapa -->
+                                <div class="col-lg-6">
+                                    <div class="mapa-box">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        <div class="mapa-txt">[[#{index.mapa.texto}]]</div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ============================================================= -->
+                    <!-- FOOTER                                                        -->
+                    <!-- ============================================================= -->
+                    <footer class="sc-footer">
+                        <div class="container" style="max-width:1200px;">
+                            <div class="row gy-4">
+                                <div class="col-md-6">
+                                    <div class="brand mb-3">Soda Candy</div>
+                                    <p style="max-width:320px; opacity:.8;">[[#{index.footer.slogan}]]</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <ul class="list-unstyled d-flex flex-column gap-2">
+                                        <li><a th:href="@{/menu/listado}">[[#{index.nav.menu}]]</a></li>
+                                        <li><a th:href="@{#nosotros}">[[#{index.nav.nosotros}]]</a></li>
+                                        <li><a th:href="@{#visitanos}">[[#{index.nav.contacto}]]</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="legal-title mb-3">[[#{index.footer.legal}]]</div>
+                                    <ul class="list-unstyled d-flex flex-column gap-2">
+                                        <li><a href="#">[[#{index.footer.privacidad}]]</a></li>
+                                        <li><a href="#">[[#{index.footer.terminos}]]</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="copy text-center pt-4 mt-4">
+                                <span>[[#{index.footer.copyright}]]</span>
+                            </div>
+                        </div>
+                    </footer>
+
+                    </body>
+                    </html>

@@ -1,12 +1,19 @@
-
+//==============================================================================
+// IMPORTES
+//==============================================================================
 package com.sodacandy.domain;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import lombok.Data;
-
+//==============================================================================
+// CURSO : APLICACIONES WEB Y PATRONES
+// PROF: WILBERT MOLINA
+// ENTREGABLE:PROYECTO
+// GRUPO:6
+// INTEGRANTES:RONALD CALDERON, SHEILYN CORDOBA, MICHELLE GUERRERO, SOFIA LOAIZA
+//==============================================================================
 @Data// hace los set y get y no hay que escribirlo
 @Entity// lo declara como entidad
 @Table(name="rol")//conecta con la tabla y se pone el nombre de la tabla NO de la clase
