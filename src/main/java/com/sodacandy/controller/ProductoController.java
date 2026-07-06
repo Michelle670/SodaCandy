@@ -2,6 +2,7 @@
 // IMPORTES
 //==============================================================================
 package com.sodacandy.controller;
+
 import com.sodacandy.domain.Producto;
 import com.sodacandy.service.CategoriaService;
 import com.sodacandy.service.ProductoService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.multipart.MultipartFile;
 //==============================================================================
 // CURSO : APLICACIONES WEB Y PATRONES
 // PROF: WILBERT MOLINA
@@ -24,6 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 // GRUPO:6
 // INTEGRANTES:RONALD CALDERON, SHEILYN CORDOBA, MICHELLE GUERRERO, SOFIA LOAIZA
 //==============================================================================
+
 @Controller// Anotacion controller
 @RequestMapping("/producto")
 
@@ -72,8 +75,10 @@ public class ProductoController {
 
     // Guarda un producto nuevo o actualiza uno existente.
     @PostMapping("/guardar")
-    public String guardar(@Valid Producto producto, RedirectAttributes redirectAttributes) {
-        productoService.save(producto);
+    public String guardar(@Valid Producto producto,
+            @RequestParam MultipartFile imagenFile,
+            RedirectAttributes redirectAttributes) {
+        productoService.save(producto, imagenFile);
         redirectAttributes.addFlashAttribute("todoOk",
                 messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
         return "redirect:/producto/listado";

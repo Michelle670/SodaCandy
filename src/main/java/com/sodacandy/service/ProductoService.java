@@ -7,15 +7,18 @@ import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.io.IOException;
+import org.springframework.web.multipart.MultipartFile;
 
 //Siempre se hace la anotacion @Service en la capa de servicio del MVC
 @Service
 public class ProductoService {
-
     private final ProductoRepository productoRepository;
+    private final FirebaseStorageService firebaseStorageService;
 
-    public ProductoService(ProductoRepository productoRepository) {
+    public ProductoService(ProductoRepository productoRepository, FirebaseStorageService firebaseStorageService) {
         this.productoRepository = productoRepository;
+        this.firebaseStorageService = firebaseStorageService;
     }
 
     // Devuelve todos los productos o solo los activos
@@ -35,8 +38,17 @@ public class ProductoService {
 
     // CREATE / UPDATE
     @Transactional
-    public void save(Producto producto) {
-        productoRepository.save(producto);
+    public void save(Producto producto, MultipartFile imagen) {
+        producto = productoRepository.save(producto);
+        if (!imagen.isEmpty()) {
+            try {
+                String ruta = firebaseStorageService
+                        .uploadImage(imagen, "producto", producto.getIdProducto());
+                producto.setRutaImagen(ruta);
+                productoRepository.save(producto);
+            } catch (IOException e) {
+            }
+        }
     }
 
     // HU-08: Marcar / desmarcar disponible (agotado)
