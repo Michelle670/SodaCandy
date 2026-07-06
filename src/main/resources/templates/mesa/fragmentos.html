@@ -78,7 +78,7 @@
                     <!-- Tarjeta de mesa: color de fondo segun estado -->
                     <div class="card sc-mesa-card h-100"
                          th:classappend="${m.estado.name() == 'LIBRE'} ? 'sc-mesa-libre'
-                                       : (${m.estado.name() == 'OCUPADA'} ? 'sc-mesa-ocupada' : 'sc-mesa-cobrar')">
+                         : (${m.estado.name() == 'OCUPADA'} ? 'sc-mesa-ocupada' : 'sc-mesa-cobrar')">
                         <div class="card-body text-center text-white d-flex flex-column">
                             <h3 class="sc-mesa-titulo mb-2">[[#{mesa.mesa}]] [[${m.numero}]]</h3>
 
@@ -105,6 +105,15 @@
                                         <i class="fa-solid fa-door-open"></i> [[#{mesa.abrir}]]
                                     </button>
                                 </form>
+                                <!-- HU-12: Botón agregar items al pedido con el total recalculado en vivo -->
+                                <form th:if="${m.estado.name() == 'OCUPADA'}"
+                                      th:action="@{/pedido/nuevo}" method="get"> 
+                                    <input type="hidden" name="idMesa" th:value="${m.idMesa}"/>
+                                    <button type="submit" class="btn btn-warning btn-sm w-100 text-dark fw-bold">
+                                        <i class="fa-solid fa-file-invoice"></i> [[#{pedido.generar}]]
+                                    </button>
+                                </form>
+                                
                                 <!-- Liberar si esta OCUPADA o POR_COBRAR -->
                                 <form th:if="${m.estado.name() != 'LIBRE'}"
                                       th:action="@{/mesa/liberar}" method="post">
@@ -136,15 +145,39 @@
 
             <!-- Estilos de las tarjetas de mesa (colores de marca por estado) -->
             <style>
-                .sc-titulo       { font-family:'Lobster', cursive; color:#590202; }
-                .sc-btn-naranja  { background-color:#d96704; color:#fff; border:none; }
-                .sc-btn-naranja:hover { background-color:#b85503; color:#fff; }
-                .sc-mesa-card    { border:none; border-radius:.6rem; }
-                .sc-mesa-titulo  { font-family:'Lobster', cursive; }
-                .sc-mesa-libre   { background-color:#1b4d3e; }   /* verde: LIBRE */
-                .sc-mesa-ocupada { background-color:#590202; }   /* vino: OCUPADA */
-                .sc-mesa-cobrar  { background-color:#d96704; }   /* naranja: POR_COBRAR */
-                .sc-badge-estado { background-color:rgba(255,255,255,.22); font-size:.75rem; }
+                .sc-titulo       {
+                    font-family:'Lobster', cursive;
+                    color:#590202;
+                }
+                .sc-btn-naranja  {
+                    background-color:#d96704;
+                    color:#fff;
+                    border:none;
+                }
+                .sc-btn-naranja:hover {
+                    background-color:#b85503;
+                    color:#fff;
+                }
+                .sc-mesa-card    {
+                    border:none;
+                    border-radius:.6rem;
+                }
+                .sc-mesa-titulo  {
+                    font-family:'Lobster', cursive;
+                }
+                .sc-mesa-libre   {
+                    background-color:#1b4d3e;
+                }   /* verde: LIBRE */
+                .sc-mesa-ocupada {
+                    background-color:#590202;
+                }   /* vino: OCUPADA */
+                .sc-mesa-cobrar  {
+                    background-color:#d96704;
+                }   /* naranja: POR_COBRAR */
+                .sc-badge-estado {
+                    background-color:rgba(255,255,255,.22);
+                    font-size:.75rem;
+                }
             </style>
         </section>
 

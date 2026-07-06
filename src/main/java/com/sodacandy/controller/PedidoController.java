@@ -2,16 +2,17 @@
 // IMPORTES
 //==============================================================================
 package com.sodacandy.controller;
+
+import com.sodacandy.domain.Categoria;
 import com.sodacandy.domain.Pedido;
+import com.sodacandy.service.CategoriaService;
 import com.sodacandy.service.PedidoService;
-import jakarta.validation.Valid;
+import com.sodacandy.service.ProductoService;
 import java.util.Locale;
-import java.util.Optional;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,60 +24,89 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 // GRUPO:6
 // INTEGRANTES:RONALD CALDERON, SHEILYN CORDOBA, MICHELLE GUERRERO, SOFIA LOAIZA
 //==============================================================================
+
 @Controller// Anotacion controller
 @RequestMapping("/pedido")// todo lo que se pida bajo /rol lo resuelve este codigo
-public class PedidoController
-{
+public class PedidoController {
+
     //Para enlazar el servicio del rol y los mensajes i18n
+    private final CategoriaService categoriaService;
+    private final ProductoService productoService;
     private final PedidoService pedidoService;
     private final MessageSource messageSource;
 
-    public PedidoController(PedidoService pedidoService, MessageSource messageSource) {
+    public PedidoController(CategoriaService categoriaService, ProductoService productoService, PedidoService pedidoService, MessageSource messageSource) {
+        this.categoriaService = categoriaService;
+        this.productoService = productoService;
         this.pedidoService = pedidoService;
         this.messageSource = messageSource;
     }
 
+    //metodo que inserta o actualiza (segun venga o no el idPedido)
+    @GetMapping("/nuevo")
+    public String nuevoPedido(@RequestParam(value = "idMesa", required = false) Integer idMesa,
+            @RequestParam(value = "idCategoria", required = false) Integer idCategoria,
+            Model model) {
+        Pedido pedido = new Pedido();
 
-    //metodo del listado
-    @GetMapping("/listado")
-    public String listado(Model model)
-    {
-        var pedidos = pedidoService.getPedidos();
-        model.addAttribute("pedidos", pedidos);
-        model.addAttribute("totalPedidos", pedidos.size());
-        return "/pedido/listado";
-    }
+        // Valores comunes obligatorios para CUALQUIER tipo de pedido nuevo
+        pedido.setIdUsuario(1); // Temporal: Usuario por defecto (Salonero/Cajero)
+        pedido.setTotal(java.math.BigDecimal.ZERO); // Inicializa en 0.00
+        pedido.setFecha(java.time.LocalDateTime.now()); // Timestamp actual del sistema
 
-    //metodo que abre la pagina de edicion
-    @GetMapping("/modificar/{idPedido}")
-    public String modificar(@PathVariable("idPedido") Integer idPedido,
-            Model model,
-            RedirectAttributes redirectAttributes)
-    {
-        Optional<Pedido> pedidoOpt = pedidoService.getPedido(idPedido);
-        if (pedidoOpt.isEmpty()) { // si no lo encontraron...
-            redirectAttributes.addFlashAttribute("error",
-                    messageSource.getMessage("rol.error01", null, Locale.getDefault()));
-            return "redirect:/pedido/listado";
+        // Condicional segun el tipo de pedido
+        if (idMesa != null) { // Si el pedido es para una mesa, se definen los siguientes parámetros
+            // --- FLUJO A: PEDIDO DE MESA ---
+            pedido.setIdMesa(idMesa);
+            pedido.setTipo(com.sodacandy.domain.TipoPedido.MESA);
+            pedido.setNombreCliente(null); // No lleva cliente directo, está asociado a la mesa
+            pedido.setTelefono(null);
+            pedido.setEstado(com.sodacandy.domain.EstadoPedido.PENDIENTE); // Estado inicial de ordenamiento
+        } else {
+            // --- FLUJO B: PEDIDO PARA LLEVAR ---
+            pedido.setTipo(com.sodacandy.domain.TipoPedido.PARA_LLEVAR);
+            pedido.setEstado(com.sodacandy.domain.EstadoPedido.EN_PREPARACION); // Estado inicial de ordenamiento
+            // El nombreCliente y telefono se mapean desde el modal
         }
-        model.addAttribute("pedido", pedidoOpt.get());
-        return "/pedido/modifica";
+
+        // 2. Se pasa el objeto "vacío" a la vista
+        model.addAttribute("pedido", pedido);
+        model.addAttribute("idMesa", idMesa);
+
+        // 3. Se cargan los productos y categorías de productos activos
+        // --- LÓGICA DE FILTRADO ---
+        int catActual = (idCategoria != null) ? idCategoria : 0;
+        model.addAttribute("categoriaSeleccionada", catActual); 
+
+        if (catActual == 0) {
+            model.addAttribute("listaProductos", productoService.getProductos(true));
+        } else {
+            model.addAttribute("listaProductos", productoService.consulta(catActual));
+        }
+        model.addAttribute("categorias", categoriaService.getCategorias(true));
+
+        return "/pedido/formulario";
     }
 
-    //metodo que inserta o actualiza (segun venga o no el idRol)
-    @PostMapping("/guardar")
-    public String guardar(@Valid Pedido pedido, RedirectAttributes redirectAttributes)
-    {
+    // Método para generar el pedido con todas las indicaciones y enviarlo a cocina
+    @PostMapping("/generar")
+    public String generarPedido(Pedido pedido, RedirectAttributes redirectAttributes) {
+
+        // Aseguramos la coherencia del timestamp justo antes de insertar
+        pedido.setFecha(java.time.LocalDateTime.now());
+
+        // Se genera el ID del pedido
         pedidoService.save(pedido);
+
         redirectAttributes.addFlashAttribute("todoOk",
                 messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
-        return "redirect:/pedido/listado";
+
+        return "redirect:/cocina/tablero";
     }
 
     //metodo que elimina
     @PostMapping("/eliminar")
-    public String eliminar(@RequestParam Integer idPedido, RedirectAttributes redirectAttributes)
-    {
+    public String eliminar(@RequestParam Integer idPedido, RedirectAttributes redirectAttributes) {
         String titulo = "todoOk";
         String detalle = "mensaje.eliminado";
         try {
@@ -95,4 +125,19 @@ public class PedidoController
                 messageSource.getMessage(detalle, null, Locale.getDefault()));
         return "redirect:/pedido/listado";
     }
+
+    @PostMapping("/consulta")
+    public String consulta(@RequestParam("idCategoria") Integer idCategoria, @RequestParam(value = "idMesa", required = false) Integer idMesa, Model model) {
+
+        Pedido pedido = new Pedido();
+        pedido.setIdMesa(idMesa);
+        model.addAttribute("pedido", pedido);
+        model.addAttribute("idMesa", idMesa);
+
+        var productos = productoService.consulta(idCategoria);
+        model.addAttribute("listaProductos", productos);
+        model.addAttribute("categorias", categoriaService.getCategorias(true));
+        return "/pedido/formulario";
+    }
+
 }

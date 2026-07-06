@@ -229,11 +229,17 @@ INSERT INTO mesa (numero, capacidad, estado, activo) VALUES
 
 -- Pedido 1: en MESA (mesa 3), tomado por el salonero, ya cobrado
 INSERT INTO pedido (id_usuario, id_mesa, tipo, nombre_cliente, telefono, estado, total) VALUES
-(2, 3, 'MESA', NULL, NULL, 'PAGADO', 8500);
+(2, 3, 'MESA', NULL, NULL, 'PAGADO', 8500),
+(2, 2, 'MESA', NULL, NULL, 'PENDIENTE', 4500),
+(2, 1, 'MESA', NULL, NULL, 'EN_PREPARACION', 6000),
+(3, 4, 'MESA', NULL, NULL, 'SERVIDO', 7800),
+(3, 5, 'MESA', NULL, NULL, 'ANULADO', 12000);
 
 -- Pedido 2: PARA_LLEVAR (mandadito), con nombre y telefono del cliente (HU-13)
 INSERT INTO pedido (id_usuario, id_mesa, tipo, nombre_cliente, telefono, estado, total) VALUES
-(2, NULL, 'PARA_LLEVAR', 'Doña Marta', '8888-7777', 'PAGADO', 3100);
+(1, NULL, 'PARA_LLEVAR', 'Doña Marta', '8888-7777', 'PAGADO', 3100),
+(1, NULL, 'PARA_LLEVAR', 'Cristian', '8929-6678', 'EN_PREPARACION', 4800),
+(1, NULL, 'PARA_LLEVAR', 'Don Mario', '8978-3333', 'ANULADO', 7800);
 
 -- Detalle de los pedidos (incluye notas HU-21)
 INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_historico, nota) VALUES
