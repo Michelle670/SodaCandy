@@ -97,12 +97,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-        <!--Esta dependencia es para generar el pdf del cobro!-->
+        <!--Esta dependencia es para generar el pdf del cobro!
         <dependency>
             <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
             <version>1.3.30</version>
-        </dependency>
+        </dependency>-->
         <!--Esta dependencia es para usar firebase-->
         <dependency>
             <groupId>com.google.firebase</groupId>

@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-    <head th:replace="~{general/fragmentos :: head}"/>
+      xmlns:th="http://www.thymeleaf.org"
+      th:lang="${#locale.language}" lang="es">
+    <head th:replace="~{general/fragmentos :: head}"></head>
 
-    <body>
+    <body class="d-flex flex-column min-vh-100">
 
-        <!-- fragmento 1 para Agregar un pedido en ventana modal -->
+
+
+        <!-- fragmento 1 para Agregar un pedido en ventana modal 
         <section th:fragment="agregar">
             <div class='row py-4 mb-2 bg-light'>
                 <div class='col-md-1'></div>
@@ -56,7 +59,7 @@
             </div>
         </section>
 
-        <!-- fragmento 2 para el listado de pedidos en curso -->
+         fragmento 2 para el listado de pedidos en curso 
         <section th:fragment="listadoEnCurso" class="p-3">
             <div class="row p-3">
                 <div class="col-md-9">
@@ -123,7 +126,7 @@
             </div>
         </section>
 
-        <!-- fragmento 3 para el listado de pedidos pagados -->
+        <!-- fragmento 3 para el listado de pedidos pagados 
         <section th:fragment="listadoTerminados" class="p-3">
             <div class="row p-3">
                 <div class="col-md-9">
@@ -179,45 +182,7 @@
         </section>
 
 
-
-        <!-- 3 Fragmento que se utiliza en la pagina modifica.html 
-        <section th:fragment="editar">
-            <div class="row">
-                <div class="col-md-2"></div>
-                <div class="col-md-8">
-                    <form method="POST" th:action="@{/rol/guardar}"
-                          th:object="${rol}" class="was-validated">
-                        <input type="hidden" name="idRol" th:field="*{idRol}"/>
-                        <div class="row py-4 mb-4 bg-light">
-                            <div class="col-md-4 d-grid">
-                                <a th:href="@{/rol/listado}" class="btn btn-primary">
-                                    <i class="fas fa-arrow-left"></i> [[#{accion.regresar}]]</a>
-                            </div>
-                            <div class="col-md-4 d-grid">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-check"></i> [[#{accion.guardar}]]</button>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="card">
-                                    <div class="card-header"><h4>[[#{accion.actualizar}]]</h4></div>
-                                    <div class="card-body">
-                                        <div class="mb-3">
-                                            <label for="rol">[[#{rol.rol}]]</label>
-                                            <input type="text" class="form-control" name="rol"
-                                                   th:field="*{rol}" required="true"/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4 fragmento que se utiliza para confirmar que se desea eliminar un Pedido -->
+        <!-- 4 fragmento que se utiliza para confirmar que se desea eliminar un Pedido 
         <section th:fragment="confirmarEliminar">
             <div class="modal fade"
                  id="confirmModal"
@@ -251,6 +216,6 @@
                 </div>
             </div>
         </section>
-
+        -->
     </body>
 </html>

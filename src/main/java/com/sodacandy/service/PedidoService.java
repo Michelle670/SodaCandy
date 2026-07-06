@@ -58,10 +58,5 @@ public class PedidoService
             throw new IllegalStateException("No se elimina porque tiene datos asociados");
         }
     }
-    
-    // ==========================
-    // FUNCIONES PARA HU
-    // ==========================
-    
-    
+
 }

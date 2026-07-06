@@ -25,11 +25,12 @@
                 .btn-volver    { border:1px solid #590202; color:#590202; }
                 .btn-volver:hover { background:#590202; color:#fff; }
             </style>
-
+            
+            <!-- Cabecera de Pedidos pendientes + botón de regresar -->
             <div class="d-flex justify-content-between align-items-start flex-wrap mb-4">
                 <div>
                     <h2 class="cocina-titulo mb-1">
-                        [[#{cocina.historial.titulo}]] ([[${totalPedidos}]])
+                        [[#{cocina.historial.titulo}]] ([[${totalPedidosServidos}]])
                     </h2>
                     <p class="text-muted mb-0">[[#{cocina.historial.subtitulo}]]</p>
                 </div>
@@ -37,11 +38,13 @@
                     <i class="fa-solid fa-arrow-left"></i> [[#{cocina.volverTablero}]]
                 </a>
             </div>
-
+            
+            <!-- Caso en que no haya pedidos en lista servidos -->
             <div th:if="${pedidos.isEmpty()}" class="alert alert-light border text-center py-5">
                 <p class="mb-0 text-muted">[[#{cocina.sinListos}]]</p>
             </div>
-
+            
+            <!-- Cuerpo de la tarjeta -->
             <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
                 <div class="col" th:each="pedido : ${pedidos}">
                     <div class="card pedido-card h-100">
