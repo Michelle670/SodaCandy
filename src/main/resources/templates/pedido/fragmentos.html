@@ -25,20 +25,23 @@
                         <div class="mb-4">
                             <div class="input-group sc-search-box">
                                 <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
-                                <input type="text" id="buscarPlatillo" class="form-control border-start-0 ps-0" placeholder="Buscar platillo..."/>
+                                <input type="text" id="buscarProducto" class="form-control border-start-0 ps-0" th:placeholder="#{producto.buscar}"/>
                             </div>
                         </div>
 
                         <!-- Botones dinámicos de búsqueda según las categorías de los productos de la base de datos -->
                         <div class="d-flex flex-wrap gap-2 mb-3">
-                            <form th:action="@{/pedido/consulta}" method="post">
-                                <input type="hidden" name="idCategoria" value="0"/>
-                                <button type="submit" class="btn sc-pill active">[[#{categoria.todos}]]</button>
-                            </form>
-                            <form th:each="cat : ${categorias}" th:action="@{/pedido/consulta}" method="post">
-                                <input type="hidden" name="idCategoria" th:value="${cat.idCategoria}"/>
-                                <button type="submit" class="btn sc-pill" th:text="${cat.descripcion}"></button>
-                            </form>
+                            <a th:href="@{/pedido/nuevo(idMesa=${idMesa}, idCategoria=0)}" 
+                               class="btn sc-pill" 
+                               th:classappend="${categoriaSeleccionada == 0} ? 'active' : ''">
+                                [[#{categoria.todos}]]
+                            </a>
+                            <a th:each="cat : ${categorias}" 
+                               th:href="@{/pedido/nuevo(idMesa=${idMesa}, idCategoria=${cat.idCategoria})}" 
+                               class="btn sc-pill"
+                               th:classappend="${categoriaSeleccionada == cat.idCategoria} ? 'active' : ''"
+                               th:text="${cat.descripcion}">
+                            </a>
                         </div>
 
                         <!-- Tarjetas de productos -->

@@ -44,7 +44,9 @@ public class PedidoController {
 
     //metodo que inserta o actualiza (segun venga o no el idPedido)
     @GetMapping("/nuevo")
-    public String nuevoPedido(@RequestParam(value = "idMesa", required = false) Integer idMesa, Model model) {
+    public String nuevoPedido(@RequestParam(value = "idMesa", required = false) Integer idMesa,
+            @RequestParam(value = "idCategoria", required = false) Integer idCategoria,
+            Model model) {
         Pedido pedido = new Pedido();
 
         // Valores comunes obligatorios para CUALQUIER tipo de pedido nuevo
@@ -72,7 +74,15 @@ public class PedidoController {
         model.addAttribute("idMesa", idMesa);
 
         // 3. Se cargan los productos y categorías de productos activos
-        model.addAttribute("listaProductos", productoService.getProductos(true));
+        // --- LÓGICA DE FILTRADO ---
+        int catActual = (idCategoria != null) ? idCategoria : 0;
+        model.addAttribute("categoriaSeleccionada", catActual); 
+
+        if (catActual == 0) {
+            model.addAttribute("listaProductos", productoService.getProductos(true));
+        } else {
+            model.addAttribute("listaProductos", productoService.consulta(catActual));
+        }
         model.addAttribute("categorias", categoriaService.getCategorias(true));
 
         return "/pedido/formulario";
@@ -118,12 +128,12 @@ public class PedidoController {
 
     @PostMapping("/consulta")
     public String consulta(@RequestParam("idCategoria") Integer idCategoria, @RequestParam(value = "idMesa", required = false) Integer idMesa, Model model) {
-        
+
         Pedido pedido = new Pedido();
         pedido.setIdMesa(idMesa);
         model.addAttribute("pedido", pedido);
         model.addAttribute("idMesa", idMesa);
-        
+
         var productos = productoService.consulta(idCategoria);
         model.addAttribute("listaProductos", productos);
         model.addAttribute("categorias", categoriaService.getCategorias(true));
