@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{general/fragmentos :: head}"/>
+
+    <body>
+        <!-- ============================================================
+             FRAGMENTO 1  Boton + Modal AGREGAR mesa
+             ============================================================ -->
+        <section th:fragment="agregar">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="sc-titulo mb-1">[[#{mesa.listado}]]</h2>
+                    <p class="text-muted mb-0">[[#{mesa.subtitulo}]]</p>
+                </div>
+                <button type="button" class="btn sc-btn-naranja"
+                        data-bs-toggle="modal" data-bs-target="#agregarMesaModal">
+                    <i class="fa-solid fa-plus"></i> [[#{mesa.agregar}]]
+                </button>
+            </div>
+
+            <!-- Modal agregar -->
+            <div class="modal fade" id="agregarMesaModal" tabindex="-1"
+                 aria-labelledby="agregarMesaLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h1 class="modal-title fs-5" id="agregarMesaLabel">
+                                <i class="fa-solid fa-chair"></i> [[#{mesa.agregar}]]
+                            </h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form th:action="@{/mesa/guardar}" class="was-validated" method="post">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label>[[#{mesa.numero}]]</label>
+                                    <input type="number" name="numero" class="form-control"
+                                           min="1" required="true"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label>[[#{mesa.capacidad}]]</label>
+                                    <input type="number" name="capacidad" class="form-control"
+                                           min="1" required="true"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label>[[#{mesa.estado}]]</label>
+                                    <select name="estado" class="form-select" required="true">
+                                        <option value="LIBRE">[[#{mesa.estado.libre}]]</option>
+                                        <option value="OCUPADA">[[#{mesa.estado.ocupada}]]</option>
+                                        <option value="POR_COBRAR">[[#{mesa.estado.porCobrar}]]</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label>[[#{mesa.activo}]]</label>
+                                    <input type="checkbox" name="activo" class="form-check-input" checked="checked"/>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-floppy-disk"></i> [[#{accion.guardar}]]
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             FRAGMENTO 2  Panel de mesas en tarjetas (HU-15)
+             ============================================================ -->
+        <section th:fragment="listado">
+            <div th:if="${mesas != null and !mesas.empty}" class="row g-3">
+                <div class="col-6 col-md-4 col-lg-3" th:each="m : ${mesas}">
+                    <!-- Tarjeta de mesa: color de fondo segun estado -->
+                    <div class="card sc-mesa-card h-100"
+                         th:classappend="${m.estado.name() == 'LIBRE'} ? 'sc-mesa-libre'
+                                       : (${m.estado.name() == 'OCUPADA'} ? 'sc-mesa-ocupada' : 'sc-mesa-cobrar')">
+                        <div class="card-body text-center text-white d-flex flex-column">
+                            <h3 class="sc-mesa-titulo mb-2">[[#{mesa.mesa}]] [[${m.numero}]]</h3>
+
+                            <!-- Badge de estado -->
+                            <div class="mb-2">
+                                <span th:if="${m.estado.name() == 'LIBRE'}"
+                                      class="badge sc-badge-estado">[[#{mesa.estado.libre}]]</span>
+                                <span th:if="${m.estado.name() == 'OCUPADA'}"
+                                      class="badge sc-badge-estado">[[#{mesa.estado.ocupada}]]</span>
+                                <span th:if="${m.estado.name() == 'POR_COBRAR'}"
+                                      class="badge sc-badge-estado">[[#{mesa.estado.porCobrar}]]</span>
+                            </div>
+
+                            <p class="small mb-3">
+                                <i class="fa-solid fa-users"></i> [[${m.capacidad}]] [[#{mesa.personas}]]
+                            </p>
+
+                            <div class="mt-auto d-grid gap-2">
+                                <!-- HU-11: abrir mesa si esta LIBRE -->
+                                <form th:if="${m.estado.name() == 'LIBRE'}"
+                                      th:action="@{/mesa/abrir}" method="post">
+                                    <input type="hidden" name="idMesa" th:value="${m.idMesa}"/>
+                                    <button type="submit" class="btn btn-light btn-sm w-100">
+                                        <i class="fa-solid fa-door-open"></i> [[#{mesa.abrir}]]
+                                    </button>
+                                </form>
+                                <!-- Liberar si esta OCUPADA o POR_COBRAR -->
+                                <form th:if="${m.estado.name() != 'LIBRE'}"
+                                      th:action="@{/mesa/liberar}" method="post">
+                                    <input type="hidden" name="idMesa" th:value="${m.idMesa}"/>
+                                    <button type="submit" class="btn btn-light btn-sm w-100">
+                                        <i class="fa-solid fa-door-closed"></i> [[#{mesa.liberar}]]
+                                    </button>
+                                </form>
+                                <div class="d-flex gap-1">
+                                    <a th:href="@{/mesa/modificar/}+${m.idMesa}"
+                                       class="btn btn-outline-light btn-sm flex-grow-1">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-light btn-sm flex-grow-1"
+                                            data-bs-toggle="modal" data-bs-target="#confirmModal"
+                                            th:data-bs-id="${m.idMesa}"
+                                            th:data-bs-descripcion="#{mesa.mesa} + ' ' + ${m.numero}">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center p-4" th:if="${mesas == null or mesas.empty}">
+                <span class="text-muted">[[#{lista.vacia}]]</span>
+            </div>
+
+            <!-- Estilos de las tarjetas de mesa (colores de marca por estado) -->
+            <style>
+                .sc-titulo       { font-family:'Lobster', cursive; color:#590202; }
+                .sc-btn-naranja  { background-color:#d96704; color:#fff; border:none; }
+                .sc-btn-naranja:hover { background-color:#b85503; color:#fff; }
+                .sc-mesa-card    { border:none; border-radius:.6rem; }
+                .sc-mesa-titulo  { font-family:'Lobster', cursive; }
+                .sc-mesa-libre   { background-color:#1b4d3e; }   /* verde: LIBRE */
+                .sc-mesa-ocupada { background-color:#590202; }   /* vino: OCUPADA */
+                .sc-mesa-cobrar  { background-color:#d96704; }   /* naranja: POR_COBRAR */
+                .sc-badge-estado { background-color:rgba(255,255,255,.22); font-size:.75rem; }
+            </style>
+        </section>
+
+        <!-- ============================================================
+             FRAGMENTO 3  Formulario editar mesa (modifica.html)
+             ============================================================ -->
+        <section th:fragment="editar">
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-8">
+                    <form method="POST" th:action="@{/mesa/guardar}"
+                          th:object="${mesa}" class="was-validated">
+                        <input type="hidden" name="idMesa" th:field="*{idMesa}"/>
+                        <div class="row py-4 mb-4 bg-light">
+                            <div class="col-md-4 d-grid">
+                                <a th:href="@{/mesa/listado}" class="btn btn-primary">
+                                    <i class="fas fa-arrow-left"></i> [[#{accion.regresar}]]
+                                </a>
+                            </div>
+                            <div class="col-md-4 d-grid">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-check"></i> [[#{accion.guardar}]]
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="card">
+                                    <div class="card-header"><h4>[[#{accion.actualizar}]] [[#{mesa.mesa}]]</h4></div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label>[[#{mesa.numero}]]</label>
+                                            <input type="number" class="form-control" name="numero"
+                                                   th:field="*{numero}" min="1" required="true"/>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>[[#{mesa.capacidad}]]</label>
+                                            <input type="number" class="form-control" name="capacidad"
+                                                   th:field="*{capacidad}" min="1" required="true"/>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>[[#{mesa.estado}]]</label>
+                                            <select name="estado" th:field="*{estado}" class="form-select" required="true">
+                                                <option th:value="LIBRE">[[#{mesa.estado.libre}]]</option>
+                                                <option th:value="OCUPADA">[[#{mesa.estado.ocupada}]]</option>
+                                                <option th:value="POR_COBRAR">[[#{mesa.estado.porCobrar}]]</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>[[#{mesa.activo}]]</label>
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="activo" id="activo" th:field="*{activo}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+             FRAGMENTO 4  Modal confirmar eliminar
+             ============================================================ -->
+        <section th:fragment="confirmarEliminar">
+            <div class="modal fade" id="confirmModal" tabindex="-1"
+                 aria-labelledby="confirmModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <form th:action="@{/mesa/eliminar}" method="post">
+                            <input type="hidden" name="idMesa" id="modalId"/>
+                            <div class="modal-header bg-warning text-white">
+                                <h5 class="modal-title" id="confirmModalLabel">
+                                    <i class="fa-solid fa-circle-radiation"></i> [[#{accion.confirmar}]]
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>[[#{accion.confirmar.texto1}]] <span id="modalDescripcion"></span>?</p>
+                                <h6>[[#{accion.confirmar.texto2}]]</h6>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]
+                                </button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </body>
+</html>
