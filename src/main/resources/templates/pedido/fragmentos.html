@@ -6,216 +6,269 @@
 
     <body class="d-flex flex-column min-vh-100">
 
+        <section th:fragment="interfazPedido">
+            <div class="container-fluid p-0 overflow-hidden">
+                <div class="row g-0 vh-100">
 
+                    <div class="col-12 col-lg-8 p-4 bg-light overflow-y-auto" style="max-height: 100vh;">
 
-        <!-- fragmento 1 para Agregar un pedido en ventana modal 
-        <section th:fragment="agregar">
-            <div class='row py-4 mb-2 bg-light'>
-                <div class='col-md-1'></div>
-                <div class='col-md-3'>
-                    <button type="button" class="btn btn-primary"
-                            data-bs-toggle="modal" data-bs-target="#crearPedidoModal">
-                        <i class="fa-solid fa-plus"></i> [[#{pedido.crearParaLlevar}]]
-                    </button>
-                </div>
-            </div>
-
-            <div class="modal fade" id="crearPedidoModal" tabindex="-1" aria-labelledby="crearPedidoLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header bg-info text-white">
-                            <h1 class="modal-title fs-5" id="crearPedidoLabel">
-                                <i class="fa-solid fa-cart-plus"></i> [[#{pedido.crearParaLlevar}]]
-                            </h1>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <!-- Título -->
+                        <div class="mb-4">
+                            <h2 class="sc-pedido-titulo">
+                                [[#{pedido.pedido}]] – 
+                                <span th:text="${idMesa != null ? #messages.msg('pedido.mesa') + ' ' + idMesa : #messages.msg('pedido.paraLlevar')}">
+                                    Mesa X / Para Llevar
+                                </span>
+                            </h2>
                         </div>
 
-                        <form th:action="@{/pedido/guardar}" th:object="${pedido}" method="POST" class="was-validated">
-                            <div class="modal-body">
-                                <input type="hidden" th:field="*{idPedido}" />
+                        <!-- Barra de búsqueda -->
+                        <div class="mb-4">
+                            <div class="input-group sc-search-box">
+                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" id="buscarPlatillo" class="form-control border-start-0 ps-0" placeholder="Buscar platillo..."/>
+                            </div>
+                        </div>
 
-                                <div class="mb-3">
-                                    <label for="nombreCliente" class="form-label">[[#{pedido.nombreCliente}]]</label>
-                                    <input type="text" class="form-control" th:field="*{nombreCliente}" required="true" maxlength="100"/>
+                        <!-- Botones dinámicos de búsqueda según las categorías de los productos de la base de datos -->
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button class="btn sc-pill active" data-categoria="todos">[[#{categoria.todos}]]</button>
+                            <button th:each="cat : ${categorias}" 
+                                    class="btn sc-pill" 
+                                    th:text="${cat.descripcion}"
+                                    th:data-id="${cat.idCategoria}">
+                            </button>
+                        </div>
+
+                        <!-- Tarjetas de productos -->
+                        <p class="text-muted small italic mb-4">[[#{producto.mostrado}]] <span th:text="${listaProductos != null ? listaProductos.size() : 0}"></span> [[#{producto.productos}]]</p>
+                        <div class="row g-3" id="contenedorProductos">
+                            <div class="col-12 col-sm-6 col-md-4 tarjeta-producto" 
+                                 th:each="p : ${listaProductos}"
+                                 th:data-categoria="${p.idCategoria}">
+
+                                <div class="card sc-platillo-card h-100 shadow-sm border-0" th:classappend="${!p.disponible} ? 'opacity-50'">
+                                    <div class="position-relative">
+                                        <img th:src="${p.rutaImagen != null and !p.rutaImagen.empty ? p.rutaImagen : '/img/platillo-defecto.jpg'}" 
+                                             class="card-img-top sc-platillo-img" alt="Producto"/>
+                                        <form th:if="${p.disponible}" th:action="@{/pedido/agregarItem}" method="post">
+                                            <input type="hidden" name="idPlatillo" th:value="${p.idProducto}"/>
+                                            <button type="submit" class="btn sc-btn-add position-absolute bottom-0 end-0 m-2 shadow">
+                                                <i class="fa-solid fa-plus text-white"></i>
+                                            </button>
+                                        </form>
+                                        <span th:if="${!p.disponible}" class="badge bg-danger position-absolute top-0 end-0 m-2">Agotado</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4 class="card-title sc-item-nombre" th:text="${p.descripcion}">Casado</h4>
+                                        <p class="card-text sc-item-precio fw-bold" th:text="'¢' + ${#numbers.formatInteger(p.precio, 1, 'POINT')}">¢0</p>
+                                    </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="telefono" class="form-label">[[#{pedido.telefono}]]</label>
-                                    <input type="tel" class="form-control" th:field="*{telefono}" required="true" maxlength="25"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4 sc-lateral-detalle p-4 d-flex flex-column" style="background-color: #fbc173; max-height: 100vh;">
+                        <h3 class="sc-lateral-titulo mb-4">Detalle del pedido</h3>
+
+                        <div class="flex-grow-1 overflow-y-auto mb-3 pe-1" style="max-height: 60vh;">
+                            <div th:each="item : ${session.itemsPedido}" class="card border-0 rounded-4 p-3 mb-3 shadow-sm bg-white position-relative">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="fw-bold text-dark" th:text="${item.cantidad + ' × ' + item.nombrePlatillo}">1 x Producto</span>
+                                    </div>
+                                    <span class="fw-bold text-dark">¢[[${#numbers.formatInteger(item.precioTotal, 1, 'POINT')}]]</span>
+                                </div>
+
+                                <div th:if="${item.nota != null and !item.nota.empty and item.prioridad != 'CRITICA'}" class="sc-nota-alerta alert-yellow p-2 rounded mb-2 small">
+                                    <i class="fa-solid fa-bars-staggered"></i> <strong>Nota:</strong> [[${item.nota}]]
+                                </div>
+
+                                <div th:if="${item.prioridad == 'CRITICA'}" class="sc-nota-alerta alert-red p-2 rounded mb-2 text-white small">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> <strong>ALERGIA CRÍTICA</strong>
+                                    <p class="mb-0 text-white-50" th:text="${item.nota}">Evitar contacto.</p>
+                                </div>
+
+                                <div th:if="${item.nota == null or item.nota.empty}" class="sc-add-nota-box p-2 text-center rounded small mb-2 border-dashed">
+                                    <span class="text-muted cursor-pointer" data-bs-toggle="modal" th:data-bs-target="'#notaModal' + ${item.idPlatillo}">
+                                        <i class="fa-solid fa-plus"></i> Agregar nota (alergias / modificaciones)
+                                    </span>
+                                </div>
+
+                                <div class="text-end">
+                                    <a th:href="@{/pedido/eliminarItem(idPlatillo=${item.idPlatillo})}" class="text-muted hover-danger">
+                                        <i class="fa-regular fa-trash-can"></i>
+                                    </a>
                                 </div>
                             </div>
 
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    [[#{accion.cancelar}]]
-                                </button>
-                                <button type="submit" class="btn btn-info text-white">
-                                    <i class="fa-solid fa-arrow-right"></i> [[#{accion.crear}]]
-                                </button>
+                            <div th:if="${session.itemsPedido == null or session.itemsPedido.empty}" class="text-center p-4 text-dark-50">
+                                <span>No has seleccionado productos aún.</span>
                             </div>
-                        </form>
+                        </div>
+
+                        <div class="mt-auto border-top border-dark border-opacity-10 pt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fs-5 fw-bold text-dark">Total:</span>
+                                <span class="sc-total-monto">¢[[${#numbers.formatInteger(totalPedido != null ? totalPedido : 0, 1, 'POINT')}]]</span>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <form th:action="@{/pedido/confirmar}" method="post">
+                                    <button type="submit" class="btn sc-btn-cocina w-100 py-3 rounded-3 fw-bold text-white shadow-sm">
+                                        <i class="fa-solid fa-paper-plane"></i> Enviar a cocina
+                                    </button>
+                                </form>
+                                <a th:href="@{/mesa/listado}" class="btn sc-btn-cancelar w-100 py-2 fw-semibold">
+                                    Cancelar pedido
+                                </a>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </div>
-        </section>
 
-         fragmento 2 para el listado de pedidos en curso 
-        <section th:fragment="listadoEnCurso" class="p-3">
-            <div class="row p-3">
-                <div class="col-md-9">
-                    <div class="card p-2">
-                        <div class="card-header">
-                            <h4>[[#{pedido.listadoEnCurso}]]</h4>
-                        </div>
-                        <div class="card-body">
-                            <div th:if="${pedidos != null and !pedidos.empty}">
-                                <table class="table table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>[[#{pedido.pedido}]]</th>
-                                            <th>[[#{pedido.usuario}]]</th>
-                                            <th>[[#{pedido.mesa}]]</th>
-                                            <th>[[#{pedido.nombreCliente}]]</th>
-                                            <th>[[#{pedido.telefono}]]</th>
-                                            <th>[[#{pedido.estado}]]</th>
-                                            <th>[[#{pedido.total}]]</th>
-                                            <th>[[#{pedido.fecha}]]</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="p : ${pedidos}" th:if="${p.estado.name() == 'EN_PREPARACION' || p.estado.name() == 'PENDIENTE' || p.estado.name() == 'SERVIDO'}">
-                                            <td>[[${p.idPedido}]]</td>
-                                            <td>[[${p.idUsuario}]]</td>
-                                            <td>[[${p.idMesa != null ? p.idMesa : #messages.msg('pedido.paraLlevar')}]]</td>
-                                            <td>[[${p.nombreCliente != null ? p.nombreCliente : #messages.msg('pedido.sinNombre')}]]</td>
-                                            <td>[[${p.telefono != null ? p.telefono : #messages.msg('pedido.sinTelefono')}]]</td>
-                                            <td><span class="badge" th:classappend="${p.estado.name() == 'SERVIDO' ? 'bg-success' : (p.estado.name() == 'EN_PREPARACION' ? 'bg-warning' : (p.estado.name() == 'PENDIENTE' ? 'bg-danger' : 'bg-secondary'))}">[[${#strings.replace(p.estado.name(), '_', ' ')}]]</span></td>
-                                            <td>[[${#numbers.formatCurrency(p.total)}]]</td>
-                                            <td>[[${p.fecha}]]</td>
-                                            <td>
-                                                <button type="button" class="btn btn-danger btn-sm"
-                                                        data-bs-toggle="modal" data-bs-target="#confirmModal"
-                                                        th:data-bs-id="${p.idPedido}"
-                                                        th:data-bs-usuario="${p.idUsuario}"
-                                                        th:data-bs-mesa="${p.idMesa}">
-                                                    <i class="fa-solid fa-trash"></i> [[#{pedido.anular}]]
-                                                </button>
-                                                <a th:href="@{/pedido/modificar/}+${p.idPedido}" class="btn btn-warning btn-sm">
-                                                    <i class="fas fa-pencil-alt"></i> [[#{accion.actualizar}]]
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="text-center p-2" th:if="${pedidos == null or pedidos.empty}">
-                                <span>[[#{lista.vacia}]]</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center bg-warning text-dark mb-3">
-                        <div class="card-body">
-                            <h3>[[#{pedido.listadoEnCurso}]]</h3>
-                            <h4 class="fs-2">[[${totalPedidosEnCurso != null ? totalPedidosEnCurso : 0}]]</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <style>
+                .sc-pedido-titulo {
+                    font-family: 'Lobster', cursive;
+                    color: #590202;
+                    font-size: 2rem;
+                }
+                .sc-lateral-titulo {
+                    font-family: 'Lobster', cursive;
+                    color: #590202;
+                    font-size: 1.8rem;
+                }
+                .sc-search-box input, .sc-search-box .input-group-text {
+                    background-color: #fff1f1;
+                    border-color: #f7d2d2;
+                    border-radius: 0.5rem;
+                }
+                .sc-pill {
+                    background-color: white;
+                    border: 1px solid #590202;
+                    color: #590202;
+                    border-radius: 50px;
+                    padding: 0.4rem 1.2rem;
+                }
+                .sc-pill.active, .sc-pill:hover {
+                    background-color: #590202;
+                    color: white !important;
+                }
+                .sc-platillo-card {
+                    border-radius: 1rem;
+                    overflow: hidden;
+                    transition: transform 0.2s;
+                }
+                .sc-platillo-card:hover {
+                    transform: translateY(-3px);
+                }
+                .sc-platillo-img {
+                    height: 160px;
+                    object-fit: cover;
+                }
+                .sc-item-nombre {
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    color: #222;
+                    margin-bottom: 0.2rem;
+                }
+                .sc-item-precio {
+                    color: #d96704;
+                    font-size: 1.1rem;
+                }
+                .sc-btn-add {
+                    background-color: #d96704;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    border: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .sc-btn-add:hover {
+                    background-color: #b85503;
+                }
+                .alert-yellow {
+                    background-color: #fef08a;
+                    border-left: 4px solid #ca8a04;
+                    color: #713f12;
+                }
+                .alert-red {
+                    background-color: #b91c1c;
+                    border-left: 4px solid #7f1d1d;
+                    color: white;
+                }
+                .border-dashed {
+                    border: 2px dashed #ca8a04;
+                    background-color: rgba(255,255,255,0.4);
+                }
+                .cursor-pointer {
+                    cursor: pointer;
+                }
+                .hover-danger:hover {
+                    color: #b91c1c !important;
+                }
+                .sc-total-monto {
+                    font-size: 2.2rem;
+                    font-weight: 900;
+                    color: #590202;
+                }
+                .sc-btn-cocina {
+                    background-color: #590202;
+                    border: none;
+                    font-size: 1.1rem;
+                }
+                .sc-btn-cocina:hover {
+                    background-color: #3d0101;
+                }
+                .sc-btn-cancelar {
+                    color: #590202;
+                    border: none;
+                    background: transparent;
+                }
+                .sc-btn-cancelar:hover {
+                    color: #b91c1c;
+                    text-decoration: underline;
+                }
+            </style>
+            
+            <!-- ============================================================
+             SCRIPT para filtrar las tarjetas de que se visualizan según los botones de las categorías
+             ============================================================ -->
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const botonesCategoria = document.querySelectorAll(".sc-pill");
+                    const tarjetasProductos = document.querySelectorAll(".tarjeta-producto");
 
-        <!-- fragmento 3 para el listado de pedidos pagados 
-        <section th:fragment="listadoTerminados" class="p-3">
-            <div class="row p-3">
-                <div class="col-md-9">
-                    <div class="card p-2">
-                        <div class="card-header">
-                            <h4>[[#{pedido.listadoTerminados}]]</h4>
-                        </div>
-                        <div class="card-body">
-                            <div th:if="${pedidos != null and !pedidos.empty}">
-                                <table class="table table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>[[#{pedido.pedido}]]</th>
-                                            <th>[[#{pedido.usuario}]]</th>
-                                            <th>[[#{pedido.mesa}]]</th>
-                                            <th>[[#{pedido.nombreCliente}]]</th>
-                                            <th>[[#{pedido.telefono}]]</th>
-                                            <th>[[#{pedido.estado}]]</th>
-                                            <th>[[#{pedido.total}]]</th>
-                                            <th>[[#{pedido.fecha}]]</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="p : ${pedidos}" th:if="${p.estado.name() == 'PAGADO' || p.estado.name() == 'ANULADO'}">
-                                            <td>[[${p.idPedido}]]</td>
-                                            <td>[[${p.idUsuario}]]</td>
-                                            <td>[[${p.idMesa != null ? p.idMesa : #messages.msg('pedido.paraLlevar')}]]</td>
-                                            <td>[[${p.nombreCliente != null ? p.nombreCliente : #messages.msg('pedido.sinNombre')}]]</td>
-                                            <td>[[${p.telefono != null ? p.telefono : #messages.msg('pedido.sinTelefono')}]]</td>
-                                            <td><span class="badge" th:classappend="${p.estado.name() == 'PAGADO' ? 'bg-success' : (p.estado.name() == 'ANULADO' ? 'bg-danger' : 'bg-secondary')}">[[${p.estado}]]</span></td>
-                                            <td>[[${#numbers.formatCurrency(p.total)}]]</td>
-                                            <td>[[${p.fecha}]]</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="text-center p-2" th:if="${pedidos == null or pedidos.empty}">
-                                <span>[[#{lista.vacia}]]</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center bg-success text-white mb-3">
-                        <div class="card-body">
-                            <h3>[[#{pedido.listadoTerminados}]]</h3>
-                            <h4 class="fs-2">[[${totalPedidosPagados != null ? totalPedidosPagados : 0}]]</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+                    botonesCategoria.forEach(boton => {
+                        boton.addEventListener("click", function () {
+                            // 1. Alternar la clase estática 'active' entre los botones
+                            botonesCategoria.forEach(b => b.classList.remove("active"));
+                            this.classList.add("active");
 
+                            // 2. Capturar el ID de la categoría seleccionada
+                            // El botón "Todos" tiene data-categoria="todos", las demás tienen data-id
+                            const categoriaSeleccionada = this.getAttribute("data-id") || this.getAttribute("data-categoria");
 
-        <!-- 4 fragmento que se utiliza para confirmar que se desea eliminar un Pedido 
-        <section th:fragment="confirmarEliminar">
-            <div class="modal fade"
-                 id="confirmModal"
-                 tabindex="-1"
-                 aria-labelledby="modalLabel"
-                 aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered custom-modal-animation">
-                    <div class="modal-content animate-slide-up">
-                        <form th:action="@{/pedido/eliminar}" method="post">
-                            <input type="hidden" name="idPedido" id="modalId"/>
-                            <div class="modal-header bg-warning text-white">
-                                <h5 class="modal-title" id="modalLabel">
-                                    <i class="fa-solid fa-circle-radiation"></i> [[#{accion.confirmar}]]
-                                </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>[[#{accion.confirmar.texto1}]] <span id="modalDescripcion"></span>?</p>
-                                <h6>[[#{accion.confirmar.texto2}]]</h6>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="fa-solid fa-trash"></i> [[#{pedido.anular}]]
-                                </button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+                            // 3. Filtrar las tarjetas mediante CSS
+                            tarjetasProductos.forEach(tarjeta => {
+                                const categoriaTarjeta = tarjeta.getAttribute("data-categoria");
+
+                                if (categoriaSeleccionada === "todos" || categoriaSeleccionada === categoriaTarjeta) {
+                                    tarjeta.style.display = "block"; // Muestra el producto
+                                } else {
+                                    tarjeta.style.display = "none";  // Oculta el producto
+                                }
+                            });
+                        });
+                    });
+                });
+            </script>
+
         </section>
-        -->
     </body>
 </html>

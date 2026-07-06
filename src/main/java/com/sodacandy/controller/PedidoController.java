@@ -4,6 +4,7 @@
 package com.sodacandy.controller;
 
 import com.sodacandy.domain.Pedido;
+import com.sodacandy.service.CategoriaService;
 import com.sodacandy.service.PedidoService;
 import com.sodacandy.service.ProductoService;
 import java.util.Locale;
@@ -29,11 +30,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class PedidoController {
 
     //Para enlazar el servicio del rol y los mensajes i18n
+    private final CategoriaService categoriaService;
     private final ProductoService productoService;
     private final PedidoService pedidoService;
     private final MessageSource messageSource;
 
-    public PedidoController(ProductoService productoService, PedidoService pedidoService, MessageSource messageSource) {
+    public PedidoController(CategoriaService categoriaService, ProductoService productoService, PedidoService pedidoService, MessageSource messageSource) {
+        this.categoriaService = categoriaService;
         this.productoService = productoService;
         this.pedidoService = pedidoService;
         this.messageSource = messageSource;
@@ -66,9 +69,11 @@ public class PedidoController {
 
         // 2. Se pasa el objeto "vacío" a la vista
         model.addAttribute("pedido", pedido);
+        model.addAttribute("idMesa", idMesa);
         
-        // 3. Se cargan los productos
+        // 3. Se cargan los productos y categorías de productos activos
         model.addAttribute("listaProductos", productoService.getProductos(true));
+        model.addAttribute("categorias", categoriaService.getCategorias(true));
 
         return "/pedido/formulario";
     }
