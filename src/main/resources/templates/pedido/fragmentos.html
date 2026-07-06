@@ -5,7 +5,6 @@
     <head th:replace="~{general/fragmentos :: head}"></head>
 
     <body class="d-flex flex-column min-vh-100">
-
         <section th:fragment="interfazPedido">
             <div class="container-fluid p-0 overflow-hidden">
                 <div class="row g-0 vh-100">
@@ -32,12 +31,14 @@
 
                         <!-- Botones dinámicos de búsqueda según las categorías de los productos de la base de datos -->
                         <div class="d-flex flex-wrap gap-2 mb-3">
-                            <button class="btn sc-pill active" data-categoria="todos">[[#{categoria.todos}]]</button>
-                            <button th:each="cat : ${categorias}" 
-                                    class="btn sc-pill" 
-                                    th:text="${cat.descripcion}"
-                                    th:data-id="${cat.idCategoria}">
-                            </button>
+                            <form th:action="@{/pedido/consulta}" method="post">
+                                <input type="hidden" name="idCategoria" value="0"/>
+                                <button type="submit" class="btn sc-pill active">[[#{categoria.todos}]]</button>
+                            </form>
+                            <form th:each="cat : ${categorias}" th:action="@{/pedido/consulta}" method="post">
+                                <input type="hidden" name="idCategoria" th:value="${cat.idCategoria}"/>
+                                <button type="submit" class="btn sc-pill" th:text="${cat.descripcion}"></button>
+                            </form>
                         </div>
 
                         <!-- Tarjetas de productos -->
@@ -57,11 +58,11 @@
                                                 <i class="fa-solid fa-plus text-white"></i>
                                             </button>
                                         </form>
-                                        <span th:if="${!p.disponible}" class="badge bg-danger position-absolute top-0 end-0 m-2">Agotado</span>
+                                        <span th:if="${!p.disponible}" class="badge bg-danger position-absolute top-0 end-0 m-2">[[#{producto.agotado}]]</span>
                                     </div>
                                     <div class="card-body">
-                                        <h4 class="card-title sc-item-nombre" th:text="${p.descripcion}">Casado</h4>
-                                        <p class="card-text sc-item-precio fw-bold" th:text="'¢' + ${#numbers.formatInteger(p.precio, 1, 'POINT')}">¢0</p>
+                                        <h4 class="card-title sc-item-nombre" th:text="${p.descripcion}"></h4>
+                                        <p class="card-text sc-item-precio fw-bold">&cent; [[${#numbers.formatDecimal(p.precio, 0, 'COMMA', 0, 'POINT')}]]</p>
                                     </div>
                                 </div>
 
@@ -70,30 +71,15 @@
                     </div>
 
                     <div class="col-12 col-lg-4 sc-lateral-detalle p-4 d-flex flex-column" style="background-color: #fbc173; max-height: 100vh;">
-                        <h3 class="sc-lateral-titulo mb-4">Detalle del pedido</h3>
+                        <h3 class="sc-lateral-titulo mb-4">[[#{pedido.detalle}]]</h3>
 
                         <div class="flex-grow-1 overflow-y-auto mb-3 pe-1" style="max-height: 60vh;">
                             <div th:each="item : ${session.itemsPedido}" class="card border-0 rounded-4 p-3 mb-3 shadow-sm bg-white position-relative">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
-                                        <span class="fw-bold text-dark" th:text="${item.cantidad + ' × ' + item.nombrePlatillo}">1 x Producto</span>
+                                        <span class="fw-bold text-dark" th:text="${item.cantidad + ' × ' + item.nombrePlatillo}"></span>
                                     </div>
                                     <span class="fw-bold text-dark">¢[[${#numbers.formatInteger(item.precioTotal, 1, 'POINT')}]]</span>
-                                </div>
-
-                                <div th:if="${item.nota != null and !item.nota.empty and item.prioridad != 'CRITICA'}" class="sc-nota-alerta alert-yellow p-2 rounded mb-2 small">
-                                    <i class="fa-solid fa-bars-staggered"></i> <strong>Nota:</strong> [[${item.nota}]]
-                                </div>
-
-                                <div th:if="${item.prioridad == 'CRITICA'}" class="sc-nota-alerta alert-red p-2 rounded mb-2 text-white small">
-                                    <i class="fa-solid fa-triangle-exclamation"></i> <strong>ALERGIA CRÍTICA</strong>
-                                    <p class="mb-0 text-white-50" th:text="${item.nota}">Evitar contacto.</p>
-                                </div>
-
-                                <div th:if="${item.nota == null or item.nota.empty}" class="sc-add-nota-box p-2 text-center rounded small mb-2 border-dashed">
-                                    <span class="text-muted cursor-pointer" data-bs-toggle="modal" th:data-bs-target="'#notaModal' + ${item.idPlatillo}">
-                                        <i class="fa-solid fa-plus"></i> Agregar nota (alergias / modificaciones)
-                                    </span>
                                 </div>
 
                                 <div class="text-end">
@@ -104,24 +90,24 @@
                             </div>
 
                             <div th:if="${session.itemsPedido == null or session.itemsPedido.empty}" class="text-center p-4 text-dark-50">
-                                <span>No has seleccionado productos aún.</span>
+                                <span>[[#{pedido.detalle.vacio}]]</span>
                             </div>
                         </div>
 
                         <div class="mt-auto border-top border-dark border-opacity-10 pt-3">
                             <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="fs-5 fw-bold text-dark">Total:</span>
+                                <span class="fs-5 fw-bold text-dark">[[#{pedido.total}]]:</span>
                                 <span class="sc-total-monto">¢[[${#numbers.formatInteger(totalPedido != null ? totalPedido : 0, 1, 'POINT')}]]</span>
                             </div>
 
                             <div class="d-grid gap-2">
                                 <form th:action="@{/pedido/confirmar}" method="post">
                                     <button type="submit" class="btn sc-btn-cocina w-100 py-3 rounded-3 fw-bold text-white shadow-sm">
-                                        <i class="fa-solid fa-paper-plane"></i> Enviar a cocina
+                                        <i class="fa-solid fa-paper-plane"></i> [[#{pedido.enviar.cocina}]]
                                     </button>
                                 </form>
                                 <a th:href="@{/mesa/listado}" class="btn sc-btn-cancelar w-100 py-2 fw-semibold">
-                                    Cancelar pedido
+                                    [[#{pedido.cancelar}]]
                                 </a>
                             </div>
                         </div>
@@ -129,6 +115,14 @@
 
                 </div>
             </div>
+
+            <!-- ============================================================
+             FRAGMENTO PARA HACER CONSULTAS
+             ============================================================ -->
+
+
+
+
 
             <style>
                 .sc-pedido-titulo {
@@ -235,40 +229,8 @@
                     text-decoration: underline;
                 }
             </style>
-            
-            <!-- ============================================================
-             SCRIPT para filtrar las tarjetas de que se visualizan según los botones de las categorías
-             ============================================================ -->
-            <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    const botonesCategoria = document.querySelectorAll(".sc-pill");
-                    const tarjetasProductos = document.querySelectorAll(".tarjeta-producto");
-
-                    botonesCategoria.forEach(boton => {
-                        boton.addEventListener("click", function () {
-                            // 1. Alternar la clase estática 'active' entre los botones
-                            botonesCategoria.forEach(b => b.classList.remove("active"));
-                            this.classList.add("active");
-
-                            // 2. Capturar el ID de la categoría seleccionada
-                            // El botón "Todos" tiene data-categoria="todos", las demás tienen data-id
-                            const categoriaSeleccionada = this.getAttribute("data-id") || this.getAttribute("data-categoria");
-
-                            // 3. Filtrar las tarjetas mediante CSS
-                            tarjetasProductos.forEach(tarjeta => {
-                                const categoriaTarjeta = tarjeta.getAttribute("data-categoria");
-
-                                if (categoriaSeleccionada === "todos" || categoriaSeleccionada === categoriaTarjeta) {
-                                    tarjeta.style.display = "block"; // Muestra el producto
-                                } else {
-                                    tarjeta.style.display = "none";  // Oculta el producto
-                                }
-                            });
-                        });
-                    });
-                });
-            </script>
-
         </section>
+
+
     </body>
 </html>

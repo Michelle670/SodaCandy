@@ -1,4 +1,5 @@
 package com.sodacandy.service;
+
 import com.sodacandy.domain.Producto;
 import com.sodacandy.repository.ProductoRepository;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 //Siempre se hace la anotacion @Service en la capa de servicio del MVC
 @Service
 public class ProductoService {
+
     private final ProductoRepository productoRepository;
 
     public ProductoService(ProductoRepository productoRepository) {
@@ -57,5 +59,14 @@ public class ProductoService {
         } catch (DataIntegrityViolationException e) {
             throw new IllegalStateException("No se elimina porque tiene datos asociados.");
         }
+    }
+
+    // Método de servicio que usa la consulta derivada
+    @Transactional(readOnly = true)
+    public List<Producto> consulta(Integer idCategoria) {
+        if (idCategoria == null || idCategoria == 0) {
+            return productoRepository.findAll(); // Si es "todos" (0), devuelve todo
+        }
+        return productoRepository.findByIdCategoriaAndDisponibleTrue(idCategoria);
     }
 }

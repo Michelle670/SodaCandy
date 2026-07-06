@@ -3,12 +3,12 @@
 //==============================================================================
 package com.sodacandy.controller;
 
+import com.sodacandy.domain.Categoria;
 import com.sodacandy.domain.Pedido;
 import com.sodacandy.service.CategoriaService;
 import com.sodacandy.service.PedidoService;
 import com.sodacandy.service.ProductoService;
 import java.util.Locale;
-import java.util.Optional;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -70,7 +70,7 @@ public class PedidoController {
         // 2. Se pasa el objeto "vacío" a la vista
         model.addAttribute("pedido", pedido);
         model.addAttribute("idMesa", idMesa);
-        
+
         // 3. Se cargan los productos y categorías de productos activos
         model.addAttribute("listaProductos", productoService.getProductos(true));
         model.addAttribute("categorias", categoriaService.getCategorias(true));
@@ -81,16 +81,16 @@ public class PedidoController {
     // Método para generar el pedido con todas las indicaciones y enviarlo a cocina
     @PostMapping("/generar")
     public String generarPedido(Pedido pedido, RedirectAttributes redirectAttributes) {
-        
+
         // Aseguramos la coherencia del timestamp justo antes de insertar
         pedido.setFecha(java.time.LocalDateTime.now());
-        
+
         // Se genera el ID del pedido
         pedidoService.save(pedido);
-        
-        redirectAttributes.addFlashAttribute("todoOk", 
-            messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
-        
+
+        redirectAttributes.addFlashAttribute("todoOk",
+                messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
+
         return "redirect:/cocina/tablero";
     }
 
@@ -114,6 +114,20 @@ public class PedidoController {
         redirectAttributes.addFlashAttribute(titulo,
                 messageSource.getMessage(detalle, null, Locale.getDefault()));
         return "redirect:/pedido/listado";
+    }
+
+    @PostMapping("/consulta")
+    public String consulta(@RequestParam("idCategoria") Integer idCategoria, @RequestParam(value = "idMesa", required = false) Integer idMesa, Model model) {
+        
+        Pedido pedido = new Pedido();
+        pedido.setIdMesa(idMesa);
+        model.addAttribute("pedido", pedido);
+        model.addAttribute("idMesa", idMesa);
+        
+        var productos = productoService.consulta(idCategoria);
+        model.addAttribute("listaProductos", productos);
+        model.addAttribute("categorias", categoriaService.getCategorias(true));
+        return "/pedido/formulario";
     }
 
 }
