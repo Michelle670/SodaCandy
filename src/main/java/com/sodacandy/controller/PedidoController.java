@@ -64,9 +64,9 @@ public class PedidoController {
     //metodo que inserta o actualiza (segun venga o no el idPedido)
     @GetMapping("/nuevo")
     public String nuevoPedido(@RequestParam(value = "idMesa", required = false) Integer idMesa,
-                              @RequestParam(value = "idCategoria", required = false) Integer idCategoria,
-                              Model model,
-                              HttpSession session) {
+            @RequestParam(value = "idCategoria", required = false) Integer idCategoria,
+            Model model,
+            HttpSession session) {
 
         // Valores comunes obligatorios para CUALQUIER tipo de pedido nuevo
         Pedido pedido = new Pedido();
@@ -103,37 +103,38 @@ public class PedidoController {
             model.addAttribute("listaProductos", productoService.consulta(catActual));
         }
         model.addAttribute("categorias", categoriaService.getCategorias(true));
-        
+
         // 4. Inicializar la lista de la sesión si aún no existe
         if (session.getAttribute("itemsPedido") == null) {
             session.setAttribute("itemsPedido", new ArrayList<LineaCocina>());
         }
-        
+
         return "/pedido/formulario";
     }
 
     // =========================================================================
     // MÉTODOS DE SESIÓN (LISTA DE PRODUCTOS DEL PEDIDO)
     // =========================================================================
-    
     // Agregar un producto a la lista temporal de la sesión
     @GetMapping("/agregar/{idProducto}")
     public String agregarItem(@PathVariable("idProducto") Integer idProducto,
-                              @RequestParam(value = "idMesa", required = false) Integer idMesa,
-                              HttpSession session) {
-        
+            @RequestParam(value = "idMesa", required = false) Integer idMesa,
+            HttpSession session) {
+
         // 1. Traemos la lista incializada se la sesión
         @SuppressWarnings("unchecked")
         List<LineaCocina> items = (List<LineaCocina>) session.getAttribute("itemsPedido");
-        if (items == null) items = new ArrayList<>();
-        
+        if (items == null) {
+            items = new ArrayList<>();
+        }
+
         // 2. Se busca el producto en la base de datos para obtener los datos
         Producto productoEncontrado = productoService.getProducto(idProducto).orElse(null);
-        
+
         if (productoEncontrado != null) {
             String nombre = productoEncontrado.getDescripcion();
             boolean existe = false;
-            
+
             // 3. Comparar si ya existe el platillo en la lista por su nombre
             for (LineaCocina item : items) {
                 if (item.getNombreProducto() != null && item.getNombreProducto().equalsIgnoreCase(nombre)) {
@@ -158,7 +159,7 @@ public class PedidoController {
         }
         return "redirect:/pedido/nuevo";
     }
-    
+
     @GetMapping("/limpiar")
     public String limpiarPedido(@RequestParam(value = "idMesa", required = false) Integer idMesa, HttpSession session) {
         session.removeAttribute("itemsPedido");
@@ -167,33 +168,52 @@ public class PedidoController {
         }
         return "redirect:/pedido/nuevo";
     }
-    
+
+    // Eliminar un ítem específico de la sesión por su posición en la lista
+    @GetMapping("/eliminarItem/{index}")
+    public String eliminarItem(@PathVariable("index") int index,
+            @RequestParam(value = "idMesa", required = false) Integer idMesa,
+            HttpSession session) {
+
+        @SuppressWarnings("unchecked")
+        List<LineaCocina> items = (List<LineaCocina>) session.getAttribute("itemsPedido");
+
+        if (items != null && index >= 0 && index < items.size()) {
+            items.remove(index); // Remueve el elemento de la lista temporal
+            session.setAttribute("itemsPedido", items);
+        }
+
+        if (idMesa != null) {
+            return "redirect:/pedido/nuevo?idMesa=" + idMesa;
+        }
+        return "redirect:/pedido/nuevo";
+    }
+
     // =========================================================================
     // MÉTODOS PARA GESTIONAR LOS PEDIDOS
     // =========================================================================
-    
     @PostMapping("/generar")
     public String generarPedido(Pedido pedido, HttpSession session, RedirectAttributes redirectAttributes) {
 
         // Aseguramos la coherencia del timestamp justo antes de insertar
         pedido.setFecha(java.time.LocalDateTime.now());
-        
+
         // Recuperar productos guardados en la sesión
         @SuppressWarnings("unchecked")
         List<LineaCocina> productos = (List<LineaCocina>) session.getAttribute("itemsPedido");
         if (productos == null) {
             productos = new ArrayList<>();
         }
-        
+
         // Se guarda el pedido completo
         pedidoService.save(pedido);
 
         // Se genera el pedido que será enviado a cocina
         PedidoCocina pedidoCocina = new PedidoCocina(pedido.getIdPedido(), pedido.getIdMesa(), productos);
-        
+
         // Limpiar la sesión tras completar el pedido
         session.removeAttribute("itemsPedido");
-        
+
         redirectAttributes.addFlashAttribute("todoOk",
                 messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
 

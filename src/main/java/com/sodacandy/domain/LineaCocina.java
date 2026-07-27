@@ -4,6 +4,7 @@
 package com.sodacandy.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 //==============================================================================
 // CURSO : APLICACIONES WEB Y PATRONES
 // PROF: WILBERT MOLINA
@@ -19,6 +20,7 @@ import lombok.Data;
 //==============================================================================
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class LineaCocina {
     private int cantidad;
     private String nombreProducto;   // resuelto desde ProductoService (o "Producto #id" si no se encuentra)
