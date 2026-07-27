@@ -88,7 +88,10 @@ public class PedidoController {
             // --- FLUJO B: PEDIDO PARA LLEVAR ---
             pedido.setTipo(com.sodacandy.domain.TipoPedido.PARA_LLEVAR);
             pedido.setEstado(com.sodacandy.domain.EstadoPedido.EN_PREPARACION); // Estado inicial de ordenamiento
-            // El nombreCliente y telefono se mapean desde el modal
+            if (session.getAttribute("nombreClienteParaLlevar") != null) {
+                pedido.setNombreCliente((String) session.getAttribute("nombreClienteParaLlevar"));
+                pedido.setTelefono((String) session.getAttribute("telefonoParaLlevar"));
+            }
         }
 
         // 2. Se pasa el objeto "vacío" a la vista
@@ -107,10 +110,28 @@ public class PedidoController {
         model.addAttribute("categorias", categoriaService.getCategorias(true));
 
         // 4. Inicializar la lista de la sesión si aún no existe
-        if (session.getAttribute("itemsPedido") == null) {
-            session.setAttribute("itemsPedido", new ArrayList<LineaCocina>());
+        @SuppressWarnings("unchecked")
+        List<LineaCocina> items = (List<LineaCocina>) session.getAttribute("itemsPedido");
+        if (items == null) {
+            items = new ArrayList<>();
+            session.setAttribute("itemsPedido", items);
+        }
+        
+        // Calculo del total del pedido
+        java.math.BigDecimal totalPedido = java.math.BigDecimal.ZERO;
+        for (LineaCocina linea : items) {
+            Producto p = productoService.getProducto(linea.getIdProducto()).orElse(null);
+            if (p != null && p.getPrecio() != null) {
+                java.math.BigDecimal subtotal = p.getPrecio().multiply(new java.math.BigDecimal(linea.getCantidad()));
+                totalPedido = totalPedido.add(subtotal);
+            }
         }
 
+        // Pasar el total calculado a la vista
+        model.addAttribute("totalPedido", totalPedido);
+        model.addAttribute("itemsPedido", items);
+        // ---------------------------------------------------
+        
         return "/pedido/formulario";
     }
 
@@ -244,6 +265,8 @@ public class PedidoController {
                 pedido.setTipo(com.sodacandy.domain.TipoPedido.MESA);
             } else {
                 pedido.setTipo(com.sodacandy.domain.TipoPedido.PARA_LLEVAR);
+                pedido.setNombreCliente((String) session.getAttribute("nombreClienteParaLlevar"));
+                pedido.setTelefono((String) session.getAttribute("telefonoParaLlevar"));
             }
         }
         if (pedido.getTotal() == null) {
@@ -293,11 +316,27 @@ public class PedidoController {
 
         // Limpiar la sesión tras completar el pedido
         session.removeAttribute("itemsPedido");
+        session.removeAttribute("nombreClienteParaLlevar");
+        session.removeAttribute("telefonoParaLlevar");
 
         redirectAttributes.addFlashAttribute("todoOk",
                 messageSource.getMessage("mensaje.actualizado", null, Locale.getDefault()));
 
         return "redirect:/cocina/tablero";
+    }
+
+    // Método para el flujo de pedidos para llevar
+    @GetMapping("/iniciarParaLlevar")
+    public String iniciarParaLlevar(@RequestParam("nombreCliente") String nombreCliente,
+            @RequestParam("telefono") String telefono,
+            HttpSession session) {
+
+        // Guardamos temporalmente los datos del cliente en la sesión
+        session.setAttribute("nombreClienteParaLlevar", nombreCliente);
+        session.setAttribute("telefonoParaLlevar", telefono);
+
+        // Redirige al formulario principal de pedidos sin mesa
+        return "redirect:/pedido/nuevo";
     }
 
     //metodo que elimina
@@ -323,16 +362,48 @@ public class PedidoController {
     }
 
     @PostMapping("/consulta")
-    public String consulta(@RequestParam("idCategoria") Integer idCategoria, @RequestParam(value = "idMesa", required = false) Integer idMesa, Model model) {
+    public String consulta(@RequestParam("idCategoria") Integer idCategoria, 
+                           @RequestParam(value = "idMesa", required = false) Integer idMesa, 
+                           Model model, 
+                           HttpSession session) {
 
         Pedido pedido = new Pedido();
         pedido.setIdMesa(idMesa);
+        
+        // Mantener tipo y datos si es para llevar
+        if (idMesa == null && session.getAttribute("nombreClienteParaLlevar") != null) {
+            pedido.setTipo(com.sodacandy.domain.TipoPedido.PARA_LLEVAR);
+            pedido.setNombreCliente((String) session.getAttribute("nombreClienteParaLlevar"));
+            pedido.setTelefono((String) session.getAttribute("telefonoParaLlevar"));
+        }
+        
         model.addAttribute("pedido", pedido);
         model.addAttribute("idMesa", idMesa);
 
-        var productos = productoService.consulta(idCategoria);
+        // Cargar ítems y calcular total actual en sesión para que no se pierda al filtrar
+        @SuppressWarnings("unchecked")
+        List<LineaCocina> items = (List<LineaCocina>) session.getAttribute("itemsPedido");
+        if (items == null) {
+            items = new ArrayList<>();
+        }
+        
+        java.math.BigDecimal totalPedido = java.math.BigDecimal.ZERO;
+        for (LineaCocina linea : items) {
+            Producto p = productoService.getProducto(linea.getIdProducto()).orElse(null);
+            if (p != null && p.getPrecio() != null) {
+                totalPedido = totalPedido.add(p.getPrecio().multiply(new java.math.BigDecimal(linea.getCantidad())));
+            }
+        }
+
+        model.addAttribute("totalPedido", totalPedido);
+        model.addAttribute("itemsPedido", items);
+
+        // Filtrar productos por categoría seleccionada
+        var productos = (idCategoria == 0) ? productoService.getProductos(true) : productoService.consulta(idCategoria);
         model.addAttribute("listaProductos", productos);
+        model.addAttribute("categoriaSeleccionada", idCategoria);
         model.addAttribute("categorias", categoriaService.getCategorias(true));
+        
         return "/pedido/formulario";
     }
 

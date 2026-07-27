@@ -117,7 +117,7 @@
                                 <div class="collapse mt-2" th:id="${'collapseNota' + stat.index}">
                                     <form th:action="@{/pedido/actualizarNota/{index}(index=${stat.index}, idMesa=${idMesa})}" method="post" class="input-group input-group-sm">
                                         <input type="text" name="nota" class="form-control" th:value="${item.nota}" placeholder="Ej: Sin cebolla, extra picante..." />
-                                        <button class="btn btn-outline-secondary" type="submit">Guardar</button>
+                                        <button class="btn btn-outline-secondary" type="submit">[[#{pedido.nota.guardar}]]</button>
                                     </form>
                                 </div>
                             </div>
