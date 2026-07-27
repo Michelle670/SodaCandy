@@ -23,6 +23,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LineaCocina {
     private int cantidad;
+    private int idProducto;
     private String nombreProducto;   // resuelto desde ProductoService (o "Producto #id" si no se encuentra)
     private String nota;             // HU-21: alergia/instruccion; null si no aplica
 }

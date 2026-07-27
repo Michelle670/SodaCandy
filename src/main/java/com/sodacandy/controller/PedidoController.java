@@ -3,19 +3,19 @@
 //==============================================================================
 package com.sodacandy.controller;
 
+import com.sodacandy.domain.DetallePedido;
 import com.sodacandy.domain.LineaCocina;
 import com.sodacandy.domain.Pedido;
 import com.sodacandy.domain.PedidoCocina;
 import com.sodacandy.domain.Producto;
 import com.sodacandy.service.CategoriaService;
+import com.sodacandy.service.DetallePedidoService;
 import com.sodacandy.service.PedidoService;
 import com.sodacandy.service.ProductoService;
 import jakarta.servlet.http.HttpSession;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -53,12 +53,14 @@ public class PedidoController {
     private final ProductoService productoService;
     private final PedidoService pedidoService;
     private final MessageSource messageSource;
+    private final DetallePedidoService detallePedidoService;
 
-    public PedidoController(CategoriaService categoriaService, ProductoService productoService, PedidoService pedidoService, MessageSource messageSource) {
+    public PedidoController(CategoriaService categoriaService, ProductoService productoService, PedidoService pedidoService, MessageSource messageSource, DetallePedidoService detallePedidoService) {
         this.categoriaService = categoriaService;
         this.productoService = productoService;
         this.pedidoService = pedidoService;
         this.messageSource = messageSource;
+        this.detallePedidoService = detallePedidoService;
     }
 
     //metodo que inserta o actualiza (segun venga o no el idPedido)
@@ -132,25 +134,24 @@ public class PedidoController {
         Producto productoEncontrado = productoService.getProducto(idProducto).orElse(null);
 
         if (productoEncontrado != null) {
-            String nombre = productoEncontrado.getDescripcion();
             boolean existe = false;
 
-            // 3. Comparar si ya existe el platillo en la lista por su nombre
+            // 3. Comparar si ya existe el platillo en la lista
             for (LineaCocina item : items) {
-                if (item.getNombreProducto() != null && item.getNombreProducto().equalsIgnoreCase(nombre)) {
+                if (item.getIdProducto() == productoEncontrado.getIdProducto()) {
                     item.setCantidad(item.getCantidad() + 1);
                     existe = true;
                     break;
                 }
             }
 
-            // 4. Si es nuevo, se instancia usando el constructor LineaCocina(cantidad, nombreProducto, nota)
+            // 4. Si es nuevo, se instancia usando el constructor LineaCocina(cantidad, idProducto, nombreProducto, nota)
             if (!existe) {
-                LineaCocina nuevoItem = new LineaCocina(1, nombre, "");
+                LineaCocina nuevoItem = new LineaCocina(1, productoEncontrado.getIdProducto(), productoEncontrado.getDescripcion(), "");
                 items.add(nuevoItem);
             }
         }
-        // 7. Se resscribe el estado de la sesion
+        // 5. Se resscribe el estado de la sesion
         session.setAttribute("itemsPedido", items);
 
         // Redirige al formulario manteniendo el ID de mesa si aplica
@@ -216,22 +217,76 @@ public class PedidoController {
     @PostMapping("/generar")
     public String generarPedido(Pedido pedido, HttpSession session, RedirectAttributes redirectAttributes) {
 
-        pedido.setFecha(java.time.LocalDateTime.now());
-
-        // Asegurar que el idUsuario nunca viaje nulo
-        if (pedido.getIdUsuario() == null) {
-            pedido.setIdUsuario(1); // ID del usuario logueado actualmente. MODIFICAR CON LA PARTE DE AUTENTICACION
-        }
-
-        // Recuperar productos guardados en la sesión
+        // 1. Recuperar productos guardados en la sesión
         @SuppressWarnings("unchecked")
         List<LineaCocina> productos = (List<LineaCocina>) session.getAttribute("itemsPedido");
         if (productos == null) {
             productos = new ArrayList<>();
         }
 
-        // Guardar pedido principal
+        // Validación adicional por si intentan enviar el pedido vacío
+        if (productos.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "No se puede generar un pedido sin productos.");
+            return "redirect:/pedido/nuevo" + (pedido.getIdMesa() != null ? "?idMesa=" + pedido.getIdMesa() : "");
+        }
+
+        // 2. Configurar datos obligatorios iniciales del pedido para evitar nulos en BD    
+        pedido.setFecha(java.time.LocalDateTime.now());
+
+        if (pedido.getIdUsuario() == null) {
+            pedido.setIdUsuario(1);
+        }
+        if (pedido.getEstado() == null) {
+            pedido.setEstado(com.sodacandy.domain.EstadoPedido.PENDIENTE);
+        }
+        if (pedido.getTipo() == null) {
+            if (pedido.getIdMesa() != null) {
+                pedido.setTipo(com.sodacandy.domain.TipoPedido.MESA);
+            } else {
+                pedido.setTipo(com.sodacandy.domain.TipoPedido.PARA_LLEVAR);
+            }
+        }
+        if (pedido.getTotal() == null) {
+            pedido.setTotal(java.math.BigDecimal.ZERO);
+        }
+
+        // 3. Calcular el total del pedido sumando las líneas del pedido
+        java.math.BigDecimal totalCalculado = java.math.BigDecimal.ZERO;
+        List<DetallePedido> detallesParaGuardar = new ArrayList<>(); // Lista temporal para almacenar los detalles listos para guardar
+
+        for (LineaCocina linea : productos) {
+            DetallePedido detalle = new DetallePedido();
+
+            detalle.setIdPedido(pedido.getIdPedido());
+            detalle.setIdProducto(linea.getIdProducto());
+            detalle.setCantidad(linea.getCantidad());
+
+            // Buscar el producto real para extraer su precio actual (precio histórico)
+            Producto productoReal = productoService.getProducto(linea.getIdProducto()).orElse(null);
+            if (productoReal != null && productoReal.getPrecio() != null) {
+                detalle.setPrecioHistorico(productoReal.getPrecio());
+
+                // Calcular subtotal de la línea y sumarlo al total general del pedido
+                java.math.BigDecimal subtotal = productoReal.getPrecio().multiply(new java.math.BigDecimal(linea.getCantidad()));
+                totalCalculado = totalCalculado.add(subtotal);
+            } else {
+                detalle.setPrecioHistorico(java.math.BigDecimal.ZERO);
+            }
+
+            detalle.setNota(linea.getNota());
+            detallesParaGuardar.add(detalle);
+        }
+        // Asignar el total calculado al pedido principal
+        pedido.setTotal(totalCalculado);
+
+        // 4. Guardar pedido principal en la base de datos
         pedidoService.save(pedido);
+
+        // 5. Asignar el idPedido generado a cada detalle y guardarlos
+        for (DetallePedido detalle : detallesParaGuardar) {
+            detalle.setIdPedido(pedido.getIdPedido());
+            detallePedidoService.save(detalle);
+        }
 
         // Crear objeto PedidoCocina con la lista acumulada
         PedidoCocina pedidoCocina = new PedidoCocina(pedido.getIdPedido(), pedido.getIdMesa(), productos);

@@ -137,10 +137,9 @@
 
                             <!-- Botón para confirmar el pedido -->
                             <div class="d-grid gap-2">
-                                <form th:action="@{/pedido/generar}" th:object="${pedido}" method="post">
-                                    <input type="hidden" th:field="*{idMesa}" />
-                                    <input type="hidden" th:field="*{tipo}" />
-                                    <input type="hidden" th:field="*{estado}" />
+                                <form th:action="@{/pedido/generar}" method="post">
+                                    <input type="hidden" name="idMesa" th:value="${idMesa}" />
+
                                     <button type="submit" class="btn sc-btn-cocina w-100 py-3 rounded-3 fw-bold text-white shadow-sm"
                                             th:disabled="${session.itemsPedido == null or session.itemsPedido.empty}">
                                         <i class="fa-solid fa-paper-plane"></i> [[#{pedido.enviar.cocina}]]

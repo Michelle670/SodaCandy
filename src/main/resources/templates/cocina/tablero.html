@@ -84,40 +84,86 @@
                 </div>
 
                 <!-- Caso en que no haya pedidos en lista pendientes -->
-                <div th:if="${pedidos.isEmpty()}" class="alert alert-light border text-center py-5">
+                <div th:if="${pedidosPendientes.isEmpty() and pedidosPreparacion.isEmpty()}" class="alert alert-light border text-center py-5 mb-5">
                     <i class="fa-solid fa-mug-hot fa-2x text-muted mb-2"></i>
                     <p class="mb-0 text-muted">[[#{cocina.sinPedidos}]]</p>
                 </div>
 
-                <!-- Cuerpo de la tarjeta -->
-                <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-                    <div class="col" th:each="pedido : ${pedidos}">
-                        <div class="card pedido-card h-100">
-                            <div class="pedido-header">
-                                <div class="fw-bold fs-5">[[#{cocina.pedido}]] #[[${pedido.idPedido}]]</div>
-                                <div class="mesa" th:if="${pedido.idMesa != null}">
-                                    [[#{cocina.mesa}]] [[${pedido.idMesa}]]
-                                </div>
-                                <div class="mesa" th:unless="${pedido.idMesa != null}">
-                                    [[#{cocina.paraLlevar}]]
-                                </div>
-                            </div>
-
-                            <div class="card-body">
-                                <div class="pedido-item" th:each="linea : ${pedido.lineas}">
-                                    <div><span class="fw-semibold">[[${linea.cantidad}]] ×</span> [[${linea.nombreProducto}]]</div>
-                                    <div class="nota" th:if="${linea.nota != null and !linea.nota.isEmpty()}">
-                                        <i class="fa-solid fa-circle-info"></i> [[${linea.nota}]]
+                <!-- Cuerpo de la tarjeta para pedidos pendientes -->
+                <div class="mb-5" th:unless="${pedidosPendientes.isEmpty()}">
+                    <h4 class="text-secondary fw-bold mb-3">
+                        <i class="fa-solid fa-hourglass-start text-danger"></i> [[#{cocina.tablero.titulo.pendientes}]]
+                    </h4>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                        <div class="col" th:each="pedido : ${pedidosPendientes}">
+                            <div class="card pedido-card h-100">
+                                
+                                <div class="pedido-header">
+                                    <div class="fw-bold fs-5">[[#{cocina.pedido}]] #[[${pedido.idPedido}]]</div>
+                                    <div class="mesa" th:if="${pedido.idMesa != null}">
+                                        [[#{cocina.mesa}]] [[${pedido.idMesa}]]
+                                    </div>
+                                    <div class="mesa" th:unless="${pedido.idMesa != null}">
+                                        [[#{cocina.paraLlevar}]]
                                     </div>
                                 </div>
+
+                                <div class="card-body">
+                                    <div class="pedido-item" th:each="linea : ${pedido.lineas}">
+                                        <div><span class="fw-semibold">[[${linea.cantidad}]] ×</span> [[${linea.nombreProducto}]]</div>
+                                        <div class="nota" th:if="${linea.nota != null and !linea.nota.isEmpty()}">
+                                            <i class="fa-solid fa-circle-info"></i> [[${linea.nota}]]
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-0 p-3">
+                                    <form th:action="@{/cocina/preparar}" method="post">
+                                        <input type="hidden" name="idPedido" th:value="${pedido.idPedido}"/>
+                                        <button type="submit" class="btn btn-listo w-100">
+                                            <i class="fa-solid fa-fire-burner"></i> [[#{cocina.preparar}]]
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
-                            <div class="card-footer bg-white border-0 p-3">
-                                <form th:action="@{/cocina/listo}" method="post">
-                                    <input type="hidden" name="idPedido" th:value="${pedido.idPedido}"/>
-                                    <button type="submit" class="btn btn-listo w-100">
-                                        <i class="fa-solid fa-circle-check"></i> [[#{cocina.marcarListo}]]
-                                    </button>
-                                </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cuerpo de la tarjeta para pedidos en preparacion -->
+                <div th:unless="${pedidosPreparacion.isEmpty()}">
+                    <h4 class="text-secondary fw-bold mb-3">
+                        <i class="fa-solid fa-fire text-warning"></i> [[#{cocina.tablero.titulo.enPreparacion}]]
+                    </h4>
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                        <div class="col" th:each="pedido : ${pedidosPreparacion}">
+                            <div class="card pedido-card h-100">
+                                
+                                <div class="pedido-header">
+                                    <div class="fw-bold fs-5">[[#{cocina.pedido}]] #[[${pedido.idPedido}]]</div>
+                                    <div class="mesa" th:if="${pedido.idMesa != null}">
+                                        [[#{cocina.mesa}]] [[${pedido.idMesa}]]
+                                    </div>
+                                    <div class="mesa" th:unless="${pedido.idMesa != null}">
+                                        [[#{cocina.paraLlevar}]]
+                                    </div>
+                                </div>
+
+                                <div class="card-body">
+                                    <div class="pedido-item" th:each="linea : ${pedido.lineas}">
+                                        <div><span class="fw-semibold">[[${linea.cantidad}]] ×</span> [[${linea.nombreProducto}]]</div>
+                                        <div class="nota" th:if="${linea.nota != null and !linea.nota.isEmpty()}">
+                                            <i class="fa-solid fa-circle-info"></i> [[${linea.nota}]]
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-0 p-3">
+                                    <form th:action="@{/cocina/listo}" method="post">
+                                        <input type="hidden" name="idPedido" th:value="${pedido.idPedido}"/>
+                                        <button type="submit" class="btn btn-listo w-100">
+                                            <i class="fa-solid fa-circle-check"></i> [[#{cocina.marcarListo}]]
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
