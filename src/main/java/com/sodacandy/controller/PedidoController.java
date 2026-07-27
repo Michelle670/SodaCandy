@@ -189,14 +189,39 @@ public class PedidoController {
         return "redirect:/pedido/nuevo";
     }
 
+    // Actualizar la nota de un ítem específico en la sesión
+    @PostMapping("/actualizarNota/{index}")
+    public String actualizarNota(@PathVariable("index") int index,
+            @RequestParam("nota") String nota,
+            @RequestParam(value = "idMesa", required = false) Integer idMesa,
+            HttpSession session) {
+
+        @SuppressWarnings("unchecked")
+        List<LineaCocina> items = (List<LineaCocina>) session.getAttribute("itemsPedido");
+
+        if (items != null && index >= 0 && index < items.size()) {
+            items.get(index).setNota(nota); // Actualiza la nota del producto en esa posición
+            session.setAttribute("itemsPedido", items);
+        }
+
+        if (idMesa != null) {
+            return "redirect:/pedido/nuevo?idMesa=" + idMesa;
+        }
+        return "redirect:/pedido/nuevo";
+    }
+
     // =========================================================================
     // MÉTODOS PARA GESTIONAR LOS PEDIDOS
     // =========================================================================
     @PostMapping("/generar")
     public String generarPedido(Pedido pedido, HttpSession session, RedirectAttributes redirectAttributes) {
 
-        // Aseguramos la coherencia del timestamp justo antes de insertar
         pedido.setFecha(java.time.LocalDateTime.now());
+
+        // Asegurar que el idUsuario nunca viaje nulo
+        if (pedido.getIdUsuario() == null) {
+            pedido.setIdUsuario(1); // ID del usuario logueado actualmente. MODIFICAR CON LA PARTE DE AUTENTICACION
+        }
 
         // Recuperar productos guardados en la sesión
         @SuppressWarnings("unchecked")
@@ -205,10 +230,10 @@ public class PedidoController {
             productos = new ArrayList<>();
         }
 
-        // Se guarda el pedido completo
+        // Guardar pedido principal
         pedidoService.save(pedido);
 
-        // Se genera el pedido que será enviado a cocina
+        // Crear objeto PedidoCocina con la lista acumulada
         PedidoCocina pedidoCocina = new PedidoCocina(pedido.getIdPedido(), pedido.getIdMesa(), productos);
 
         // Limpiar la sesión tras completar el pedido

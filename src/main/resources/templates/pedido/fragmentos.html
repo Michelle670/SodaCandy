@@ -93,14 +93,32 @@
                                     <div>
                                         <span class="fw-bold text-dark" th:text="${item.cantidad + ' × ' + item.nombreProducto}"></span>
                                     </div>
-                                    <!-- Eliminar item de la lista -->
-                                    <a th:href="@{/pedido/eliminarItem/{index}(index=${stat.index}, idMesa=${idMesa})}" class="text-muted hover-danger ms-2">
-                                        <i class="fa-regular fa-trash-can"></i>
-                                    </a>
+
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button class="btn btn-sm btn-light text-muted border-0" type="button" 
+                                                data-bs-toggle="collapse" 
+                                                th:data-bs-target="${'#collapseNota' + stat.index}" 
+                                                aria-expanded="false" 
+                                                th:aria-controls="${'collapseNota' + stat.index}"
+                                                title="Agregar nota/alergia">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+
+                                        <a th:href="@{/pedido/eliminarItem/{index}(index=${stat.index}, idMesa=${idMesa})}" class="text-muted hover-danger">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </a>
+                                    </div>
                                 </div>
 
-                                <div th:if="${item.nota != null and !item.nota.empty}" class="small text-muted fst-italic mb-2">
+                                <div th:if="${item.nota != null and !item.nota.empty}" class="small text-danger fst-italic mb-2">
                                     Nota: <span th:text="${item.nota}"></span>
+                                </div>
+
+                                <div class="collapse mt-2" th:id="${'collapseNota' + stat.index}">
+                                    <form th:action="@{/pedido/actualizarNota/{index}(index=${stat.index}, idMesa=${idMesa})}" method="post" class="input-group input-group-sm">
+                                        <input type="text" name="nota" class="form-control" th:value="${item.nota}" placeholder="Ej: Sin cebolla, extra picante..." />
+                                        <button class="btn btn-outline-secondary" type="submit">Guardar</button>
+                                    </form>
                                 </div>
                             </div>
 
