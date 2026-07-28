@@ -5,49 +5,132 @@
     <head th:replace="~{general/fragmentos :: head}"></head>
     <body>
 
-        <!-- Navbar PUBLICO Mismo de la bienvenida -->
+        <!-- Navbar publico -->
         <header th:replace="~{general/fragmentos :: headerPublico}"></header>
 
-
         <section class="container py-4">
+
             <h2 class="mb-4"><i class="fa-solid fa-book-open text-success"></i> [[#{menu.titulo}]]</h2>
-            <!-- Por cada categoria activa se muestran sus platillos disponibles -->
-            <div th:each="cat : ${categorias}" class="mb-4">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h4 class="mb-0">[[${cat.descripcion}]]</h4>
-                    </div>
-                    <div class="card-body">
-                        <table class="table table-hover">
-                            <tbody>
-                                <tr th:each="p : ${productos}"
-                                    th:if="${p.idCategoria == cat.idCategoria and p.disponible}">
-                                    <td style="width:70px;">
-                                        <img th:if="${p.rutaImagen != null and !p.rutaImagen.isEmpty()}"
-                                             th:src="@{${p.rutaImagen}}" alt="img" height="50"/>
-                                    </td>
-                                    <td>
-                                        <strong>[[${p.descripcion}]]</strong><br/>
-                                        <small class="text-muted">[[${p.detalle}]]</small>
-                                    </td>
-                                    <td class="text-end align-middle">
-                                        <span class="badge bg-warning text-dark fs-6">
-                                            &cent; [[${#numbers.formatDecimal(p.precio, 0, 'COMMA', 0, 'POINT')}]]</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+
+            <!-- Barra de búsqueda — igual que en pedidos, filtra en el cliente con JS -->
+            <div class="mb-4">
+                <div class="input-group sc-search-box">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="buscarProducto" class="form-control border-start-0 ps-0"
+                           th:placeholder="#{producto.buscar}"/>
                 </div>
             </div>
-            <div class="text-center p-3" th:if="${categorias == null or categorias.empty}">
+
+            <!-- Botones de categoría — igual que en pedidos -->
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <a th:href="@{/menu/listado(idCategoria=0)}"
+                   class="btn sc-pill"
+                   th:classappend="${categoriaSeleccionada == 0} ? 'active' : ''">
+                    [[#{categoria.todos}]]
+                </a>
+                <a th:each="cat : ${categorias}"
+                   th:href="@{/menu/listado(idCategoria=${cat.idCategoria})}"
+                   class="btn sc-pill"
+                   th:classappend="${categoriaSeleccionada == cat.idCategoria} ? 'active' : ''"
+                   th:text="${cat.descripcion}">
+                </a>
+            </div>
+
+            <!-- Contador de productos -->
+            <p class="text-muted small mb-4">
+                [[#{producto.mostrado}]]
+                <span th:text="${productos != null ? productos.size() : 0}"></span>
+                [[#{producto.productos}]]
+            </p>
+
+            <!-- Tarjetas de productos — mismo estilo que pedidos -->
+            <div class="row g-3" id="contenedorProductos">
+                <div class="col-12 col-sm-6 col-md-4 tarjeta-producto"
+                     th:each="p : ${productos}"
+                     th:data-nombre="${p.descripcion}">
+
+                    <div class="card sc-platillo-card h-100 shadow-sm border-0">
+                        <div class="position-relative">
+                            <img th:src="${p.rutaImagen != null and !p.rutaImagen.empty ? p.rutaImagen : '/img/platillo-defecto.jpg'}"
+                                 class="card-img-top sc-platillo-img" alt="Producto"/>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title sc-item-nombre" th:text="${p.descripcion}"></h5>
+                            <p class="card-text text-muted small" th:text="${p.detalle}"></p>
+                            <p class="card-text sc-item-precio fw-bold">
+                                &cent; [[${#numbers.formatDecimal(p.precio, 0, 'COMMA', 0, 'POINT')}]]
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Mensaje lista vacía -->
+            <div class="text-center p-3" th:if="${productos == null or productos.empty}">
                 <span>[[#{lista.vacia}]]</span>
             </div>
+
         </section>
 
-
-        <!-- Footer publico (el mismo estilo vino de la bienvenida) -->
+        <!-- Footer publico -->
         <footer th:replace="~{general/fragmentos :: footer}"></footer>
+
+        <!-- JS: búsqueda en tiempo real igual que pedidos -->
+        <script>
+            document.getElementById('buscarProducto').addEventListener('input', function () {
+                var texto = this.value.toLowerCase();
+                document.querySelectorAll('.tarjeta-producto').forEach(function (tarjeta) {
+                    var nombre = tarjeta.getAttribute('data-nombre').toLowerCase();
+                    tarjeta.style.display = nombre.includes(texto) ? '' : 'none';
+                });
+            });
+        </script>
+
+        <style>
+            .sc-search-box input,
+            .sc-search-box .input-group-text {
+                background-color: #fff1f1;
+                border-color: #f7d2d2;
+                border-radius: 0.5rem;
+            }
+            .sc-pill {
+                background-color: white;
+                border: 1px solid #590202;
+                color: #590202;
+                border-radius: 50px;
+                font-size: 0.85rem;
+                padding: 0.3rem 1rem;
+            }
+            .sc-pill.active,
+            .sc-pill:hover {
+                background-color: #590202;
+                color: white;
+            }
+            .sc-platillo-card {
+                border-radius: 1rem;
+                transition: transform 0.15s;
+            }
+            .sc-platillo-card:hover {
+                transform: translateY(-3px);
+            }
+            .sc-platillo-img {
+                height: 180px;
+                object-fit: cover;
+                border-radius: 1rem 1rem 0 0;
+            }
+            .sc-item-nombre {
+                font-size: 1rem;
+                font-weight: 600;
+                color: #590202;
+            }
+            .sc-item-precio {
+                color: #c07000;
+                font-size: 1rem;
+            }
+        </style>
 
     </body>
 </html>
