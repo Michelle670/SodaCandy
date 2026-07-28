@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 //Siempre se hace la anotacion @Service en la capa de servicio del MVC
 @Service
 public class ProductoService {
-
     private final ProductoRepository productoRepository;
     private final FirebaseStorageService firebaseStorageService;
 
@@ -72,5 +71,14 @@ public class ProductoService {
         } catch (DataIntegrityViolationException e) {
             throw new IllegalStateException("No se elimina porque tiene datos asociados.");
         }
+    }
+
+    // Método de servicio que usa la consulta derivada
+    @Transactional(readOnly = true)
+    public List<Producto> consulta(Integer idCategoria) {
+        if (idCategoria == null || idCategoria == 0) {
+            return productoRepository.findAll(); // Si es "todos" (0), devuelve todo
+        }
+        return productoRepository.findByIdCategoriaAndDisponibleTrue(idCategoria);
     }
 }

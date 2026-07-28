@@ -1,167 +1,267 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-    <head th:replace="~{general/fragmentos :: head}"/>
+      xmlns:th="http://www.thymeleaf.org"
+      th:lang="${#locale.language}" lang="es">
+    <head th:replace="~{general/fragmentos :: head}"></head>
 
-    <body>
-        <!-- fragmento 1 para Agregar rol en ventana modal -->
-        <section th:fragment="agregar">
-            <!-- Button trigger modal -->
-            <div class='row py-4 mb-2 bg-light'>
-                <div class='col-md-1'></div>
-                <div class='col-md-3'>
-                    <!-- El profe pondra aqui sec:authorize="hasRole('ROLE_ADMIN')" cuando ensene seguridad -->
-                    <button type="button" class="btn btn-primary"
-                            data-bs-toggle="modal" data-bs-target="#agregarRolModal">
-                        <i class="fa-solid fa-plus"></i> [[#{rol.agregar}]]</button>
-                </div>
-            </div>
-            <!-- Modal -->
-            <div class="modal fade" id="agregarRolModal" tabindex="-1"
-                 aria-labelledby="agregarRolLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header bg-info text-white">
-                            <h1 class="modal-title fs-5" id="agregarRolLabel">
-                                <i class="fa-solid fa-user-shield"></i> [[#{rol.agregar}]]</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <body class="d-flex flex-column min-vh-100">
+        <section th:fragment="interfazPedido">
+            <div class="container-fluid p-0 overflow-hidden">
+                <div class="row g-0 vh-100">
+
+                    <div class="col-12 col-lg-8 p-4 bg-light overflow-y-auto" style="max-height: 100vh;">
+
+                        <!-- Título -->
+                        <div class="mb-4">
+                            <h2 class="sc-pedido-titulo">
+                                [[#{pedido.pedido}]] – 
+                                <span th:text="${idMesa != null ? #messages.msg('pedido.mesa') + ' ' + idMesa : #messages.msg('pedido.paraLlevar')}">
+                                    Mesa X / Para Llevar
+                                </span>
+                            </h2>
                         </div>
-                        <form th:action='@{/rol/guardar}' th:object='${rol}'
-                              class='was-validated' method="post">
-                            <div class="modal-body">
-                                <div class='mb-3'>
-                                    <label>[[#{rol.rol}]]</label>
-                                    <input type="text" name='rol' class='form-control' required="true"/></div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]</button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fa-solid fa-floppy-disk"></i> [[#{accion.guardar}]]</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
 
-        <!-- fragmento 2 para el listado de roles -->
-        <section th:fragment="listado" class="p-3">
-            <div class="row p-3">
-                <div class="col-md-9">
-                    <div class="card p-2">
-                        <div class="card-header"><h4>[[#{rol.listado}]]</h4></div>
-                        <div class="card-body">
-                            <div th:if="${roles != null and !roles.empty}">
-                                <table class="table table-striped table-hover">
-                                    <thead><tr><th>#</th>
-                                            <th>[[#{rol.rol}]]</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr th:each="r : ${roles}">
-                                            <td>[[${r.idRol}]]</td>
-                                            <td>[[${r.rol}]]</td>
-                                            <td>
-                                                <button type="button" class="btn btn-danger"
-                                                        data-bs-toggle="modal" data-bs-target="#confirmModal"
-                                                        th:data-bs-id="${r.idRol}"
-                                                        th:data-bs-descripcion="${r.rol}">
-                                                    <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]
-                                                </button>
-                                                <a th:href="@{/rol/modificar/}+${r.idRol}" class="btn btn-warning">
-                                                    <i class="fas fa-pencil-alt"></i> [[#{accion.actualizar}]]
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table></div>
-                            <div class="text-center p-2" th:if="${roles == null or roles.empty}">
-                                <span>[[#{lista.vacia}]]</span></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-center bg-success text-white mb-3">
-                        <div class="card-body"><h3>[[#{rol.total}]]</h3>
-                            <h4 class="fs-2"><i class="fas fa-user-shield"></i> [[${totalRoles}]]</h4>
-                        </div></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3 Fragmento que se utiliza en la pagina modifica.html -->
-        <section th:fragment="editar">
-            <div class="row">
-                <div class="col-md-2"></div>
-                <div class="col-md-8">
-                    <form method="POST" th:action="@{/rol/guardar}"
-                          th:object="${rol}" class="was-validated">
-                        <input type="hidden" name="idRol" th:field="*{idRol}"/>
-                        <div class="row py-4 mb-4 bg-light">
-                            <div class="col-md-4 d-grid">
-                                <a th:href="@{/rol/listado}" class="btn btn-primary">
-                                    <i class="fas fa-arrow-left"></i> [[#{accion.regresar}]]</a>
-                            </div>
-                            <div class="col-md-4 d-grid">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-check"></i> [[#{accion.guardar}]]</button>
+                        <!-- Barra de búsqueda -->
+                        <div class="mb-4">
+                            <div class="input-group sc-search-box">
+                                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                                <input type="text" id="buscarProducto" class="form-control border-start-0 ps-0" th:placeholder="#{producto.buscar}"/>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col">
-                                <div class="card">
-                                    <div class="card-header"><h4>[[#{accion.actualizar}]]</h4></div>
+
+                        <!-- Botones dinámicos de búsqueda según las categorías de los productos de la base de datos -->
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <a th:href="@{/pedido/nuevo(idMesa=${idMesa}, idCategoria=0)}" 
+                               class="btn sc-pill" 
+                               th:classappend="${categoriaSeleccionada == 0} ? 'active' : ''">
+                                [[#{categoria.todos}]]
+                            </a>
+                            <a th:each="cat : ${categorias}" 
+                               th:href="@{/pedido/nuevo(idMesa=${idMesa}, idCategoria=${cat.idCategoria})}" 
+                               class="btn sc-pill"
+                               th:classappend="${categoriaSeleccionada == cat.idCategoria} ? 'active' : ''"
+                               th:text="${cat.descripcion}">
+                            </a>
+                        </div>
+
+                        <!-- Tarjetas de productos -->
+                        <p class="text-muted small italic mb-4">[[#{producto.mostrado}]] <span th:text="${listaProductos != null ? listaProductos.size() : 0}"></span> [[#{producto.productos}]]</p>
+                        <div class="row g-3" id="contenedorProductos">
+                            <div class="col-12 col-sm-6 col-md-4 tarjeta-producto" 
+                                 th:each="p : ${listaProductos}"
+                                 th:data-categoria="${p.idCategoria}">
+
+                                <div class="card sc-platillo-card h-100 shadow-sm border-0" th:classappend="${!p.disponible} ? 'opacity-50'">
+                                    <div class="position-relative">
+                                        <img th:src="${p.rutaImagen != null and !p.rutaImagen.empty ? p.rutaImagen : '/img/platillo-defecto.jpg'}" 
+                                             class="card-img-top sc-platillo-img" alt="Producto"/>
+
+                                        <a th:if="${p.disponible}" th:href="@{/pedido/agregar/{id}(id=${p.idProducto}, idMesa=${idMesa})}" class="btn sc-btn-add position-absolute bottom-0 end-0 m-2 shadow text-decoration-none">
+                                            <i class="fa-solid fa-plus text-white"></i>
+                                        </a>
+
+                                        <span th:if="${!p.disponible}" class="badge bg-danger position-absolute top-0 end-0 m-2">[[#{producto.agotado}]]</span>
+                                    </div>
+
                                     <div class="card-body">
-                                        <div class="mb-3">
-                                            <label for="rol">[[#{rol.rol}]]</label>
-                                            <input type="text" class="form-control" name="rol"
-                                                   th:field="*{rol}" required="true"/>
-                                        </div>
+                                        <h4 class="card-title sc-item-nombre" th:text="${p.descripcion}"></h4>
+                                        <p class="card-text sc-item-precio fw-bold">&cent; [[${#numbers.formatDecimal(p.precio, 0, 'COMMA', 0, 'POINT')}]]</p>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección de detalles del producto -->
+                    <div class="col-12 col-lg-4 sc-lateral-detalle p-4 d-flex flex-column" style="background-color: #fbc173; max-height: 100vh;">
+
+                        <!-- Encabezado de la sección de detalles del producto -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="sc-lateral-titulo mb-0">[[#{pedido.detalle}]]</h3>
+                            <a th:if="${session.itemsPedido != null and !session.itemsPedido.empty}" 
+                               th:href="@{/pedido/limpiar(idMesa=${idMesa})}" class="btn btn-sm btn-outline-dark border-0">
+                                <i class="fa-solid fa-broom"></i> Limpiar
+                            </a>
+                        </div>
+
+                        <!-- Seccion del item agregado -->
+                        <div class="flex-grow-1 overflow-y-auto mb-3 pe-1" style="max-height: 60vh;">
+                            <div th:each="item, stat : ${session.itemsPedido}" class="card border-0 rounded-4 p-3 mb-3 shadow-sm bg-white position-relative">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span class="fw-bold text-dark" th:text="${item.cantidad + ' × ' + item.nombreProducto}"></span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button class="btn btn-sm btn-light text-muted border-0" type="button" 
+                                                data-bs-toggle="collapse" 
+                                                th:data-bs-target="${'#collapseNota' + stat.index}" 
+                                                aria-expanded="false" 
+                                                th:aria-controls="${'collapseNota' + stat.index}"
+                                                title="Agregar nota/alergia">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+
+                                        <a th:href="@{/pedido/eliminarItem/{index}(index=${stat.index}, idMesa=${idMesa})}" class="text-muted hover-danger">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </a>
                                     </div>
                                 </div>
+
+                                <div th:if="${item.nota != null and !item.nota.empty}" class="small text-danger fst-italic mb-2">
+                                    Nota: <span th:text="${item.nota}"></span>
+                                </div>
+
+                                <div class="collapse mt-2" th:id="${'collapseNota' + stat.index}">
+                                    <form th:action="@{/pedido/actualizarNota/{index}(index=${stat.index}, idMesa=${idMesa})}" method="post" class="input-group input-group-sm">
+                                        <input type="text" name="nota" class="form-control" th:value="${item.nota}" placeholder="Ej: Sin cebolla, extra picante..." />
+                                        <button class="btn btn-outline-secondary" type="submit">[[#{pedido.nota.guardar}]]</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div th:if="${session.itemsPedido == null or session.itemsPedido.empty}" class="text-center p-4 text-dark-50">
+                                <span>[[#{pedido.detalle.vacio}]]</span>
                             </div>
                         </div>
-                    </form>
+
+
+                        <div class="mt-auto border-top border-dark border-opacity-10 pt-3">
+                            <!-- Muestra del costo total del pedido -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="fs-5 fw-bold text-dark">[[#{pedido.total}]]:</span>
+                                <span class="sc-total-monto">¢[[${#numbers.formatInteger(totalPedido != null ? totalPedido : 0, 1, 'POINT')}]]</span>
+                            </div>
+
+                            <!-- Botón para confirmar el pedido -->
+                            <div class="d-grid gap-2">
+                                <form th:action="@{/pedido/generar}" method="post">
+                                    <input type="hidden" name="idMesa" th:value="${idMesa}" />
+
+                                    <button type="submit" class="btn sc-btn-cocina w-100 py-3 rounded-3 fw-bold text-white shadow-sm"
+                                            th:disabled="${session.itemsPedido == null or session.itemsPedido.empty}">
+                                        <i class="fa-solid fa-paper-plane"></i> [[#{pedido.enviar.cocina}]]
+                                    </button>
+                                </form>
+                                <a th:href="@{/mesa/listado}" class="btn sc-btn-cancelar w-100 py-2 fw-semibold">
+                                    [[#{pedido.cancelar}]]
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+
+            <style>
+                .sc-pedido-titulo {
+                    font-family: 'Lobster', cursive;
+                    color: #590202;
+                    font-size: 2rem;
+                }
+                .sc-lateral-titulo {
+                    font-family: 'Lobster', cursive;
+                    color: #590202;
+                    font-size: 1.8rem;
+                }
+                .sc-search-box input, .sc-search-box .input-group-text {
+                    background-color: #fff1f1;
+                    border-color: #f7d2d2;
+                    border-radius: 0.5rem;
+                }
+                .sc-pill {
+                    background-color: white;
+                    border: 1px solid #590202;
+                    color: #590202;
+                    border-radius: 50px;
+                    padding: 0.4rem 1.2rem;
+                }
+                .sc-pill.active, .sc-pill:hover {
+                    background-color: #590202;
+                    color: white !important;
+                }
+                .sc-platillo-card {
+                    border-radius: 1rem;
+                    overflow: hidden;
+                    transition: transform 0.2s;
+                }
+                .sc-platillo-card:hover {
+                    transform: translateY(-3px);
+                }
+                .sc-platillo-img {
+                    height: 160px;
+                    object-fit: cover;
+                }
+                .sc-item-nombre {
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    color: #222;
+                    margin-bottom: 0.2rem;
+                }
+                .sc-item-precio {
+                    color: #d96704;
+                    font-size: 1.1rem;
+                }
+                .sc-btn-add {
+                    background-color: #d96704;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    border: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .sc-btn-add:hover {
+                    background-color: #b85503;
+                }
+                .alert-yellow {
+                    background-color: #fef08a;
+                    border-left: 4px solid #ca8a04;
+                    color: #713f12;
+                }
+                .alert-red {
+                    background-color: #b91c1c;
+                    border-left: 4px solid #7f1d1d;
+                    color: white;
+                }
+                .border-dashed {
+                    border: 2px dashed #ca8a04;
+                    background-color: rgba(255,255,255,0.4);
+                }
+                .cursor-pointer {
+                    cursor: pointer;
+                }
+                .hover-danger:hover {
+                    color: #b91c1c !important;
+                }
+                .sc-total-monto {
+                    font-size: 2.2rem;
+                    font-weight: 900;
+                    color: #590202;
+                }
+                .sc-btn-cocina {
+                    background-color: #590202;
+                    border: none;
+                    font-size: 1.1rem;
+                }
+                .sc-btn-cocina:hover {
+                    background-color: #3d0101;
+                }
+                .sc-btn-cancelar {
+                    color: #590202;
+                    border: none;
+                    background: transparent;
+                }
+                .sc-btn-cancelar:hover {
+                    color: #b91c1c;
+                    text-decoration: underline;
+                }
+            </style>
         </section>
 
-        <!-- 4 fragmento que se utiliza para confirmar que se desea eliminar un rol -->
-        <section th:fragment="confirmarEliminar">
-            <div class="modal fade"
-                 id="confirmModal"
-                 tabindex="-1"
-                 aria-labelledby="modalLabel"
-                 aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered custom-modal-animation">
-                    <div class="modal-content animate-slide-up">
-                        <form th:action="@{/rol/eliminar}" method="post">
-                            <input type="hidden" name="idRol" id="modalId"/>
-                            <div class="modal-header bg-warning text-white">
-                                <h5 class="modal-title" id="modalLabel">
-                                    <i class="fa-solid fa-circle-radiation"></i> [[#{accion.confirmar}]]
-                                </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                            </div>
-                            <div class="modal-body">
-                                <p>[[#{accion.confirmar.texto1}]] <span id="modalDescripcion"></span>?</p>
-                                <h6>[[#{accion.confirmar.texto2}]]</h6>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="submit" class="btn btn-danger">
-                                    <i class="fa-solid fa-trash"></i> [[#{accion.eliminar}]]
-                                </button>
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </section>
 
     </body>
 </html>

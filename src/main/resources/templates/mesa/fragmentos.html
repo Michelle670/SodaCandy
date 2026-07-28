@@ -13,10 +13,18 @@
                     <h2 class="sc-titulo mb-1">[[#{mesa.listado}]]</h2>
                     <p class="text-muted mb-0">[[#{mesa.subtitulo}]]</p>
                 </div>
-                <button type="button" class="btn sc-btn-naranja"
-                        data-bs-toggle="modal" data-bs-target="#agregarMesaModal">
-                    <i class="fa-solid fa-plus"></i> [[#{mesa.agregar}]]
-                </button>
+
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-success"
+                            data-bs-toggle="modal" data-bs-target="#llevarModal">
+                        <i class="fa-solid fa-bag-shopping"></i> [[#{pedido.paraLlevar}]]
+                    </button>
+
+                    <button type="button" class="btn sc-btn-naranja"
+                            data-bs-toggle="modal" data-bs-target="#agregarMesaModal">
+                        <i class="fa-solid fa-plus"></i> [[#{mesa.agregar}]]
+                    </button>
+                </div>
             </div>
 
             <!-- Modal agregar -->
@@ -67,6 +75,41 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Modal para llevar -->
+            <div class="modal fade" id="llevarModal" tabindex="-1" aria-labelledby="llevarModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-success text-white">
+                            <h1 class="modal-title fs-5" id="llevarModalLabel">
+                                <i class="fa-solid fa-bag-shopping"></i> Registrar Datos - Para Llevar
+                            </h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form th:action="@{/pedido/iniciarParaLlevar}" class="was-validated" method="get">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{pedido.paraLlevar.Cliente.nombre}]]</label>
+                                    <input type="text" name="nombreCliente" class="form-control" required="true" placeholder="Nombre Apellido"/>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">[[#{pedido.paraLlevar.Cliente.telefono}]]</label>
+                                    <input type="tel" name="telefono" class="form-control" required="true" placeholder="Ej. 8888-8888"/>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fa-solid fa-xmark"></i> [[#{accion.cerrar}]]
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fa-solid fa-arrow-right"></i> [[#{pedido.paraLlevar.siguiente}]]
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
         <!-- ============================================================
@@ -78,7 +121,7 @@
                     <!-- Tarjeta de mesa: color de fondo segun estado -->
                     <div class="card sc-mesa-card h-100"
                          th:classappend="${m.estado.name() == 'LIBRE'} ? 'sc-mesa-libre'
-                                       : (${m.estado.name() == 'OCUPADA'} ? 'sc-mesa-ocupada' : 'sc-mesa-cobrar')">
+                         : (${m.estado.name() == 'OCUPADA'} ? 'sc-mesa-ocupada' : 'sc-mesa-cobrar')">
                         <div class="card-body text-center text-white d-flex flex-column">
                             <h3 class="sc-mesa-titulo mb-2">[[#{mesa.mesa}]] [[${m.numero}]]</h3>
 
@@ -105,6 +148,15 @@
                                         <i class="fa-solid fa-door-open"></i> [[#{mesa.abrir}]]
                                     </button>
                                 </form>
+                                <!-- HU-12: Botón agregar items al pedido con el total recalculado en vivo -->
+                                <form th:if="${m.estado.name() == 'OCUPADA'}"
+                                      th:action="@{/pedido/nuevo}" method="get"> 
+                                    <input type="hidden" name="idMesa" th:value="${m.idMesa}"/>
+                                    <button type="submit" class="btn btn-warning btn-sm w-100 text-dark fw-bold">
+                                        <i class="fa-solid fa-file-invoice"></i> [[#{pedido.generar}]]
+                                    </button>
+                                </form>
+
                                 <!-- Liberar si esta OCUPADA o POR_COBRAR -->
                                 <form th:if="${m.estado.name() != 'LIBRE'}"
                                       th:action="@{/mesa/liberar}" method="post">
@@ -136,15 +188,39 @@
 
             <!-- Estilos de las tarjetas de mesa (colores de marca por estado) -->
             <style>
-                .sc-titulo       { font-family:'Lobster', cursive; color:#590202; }
-                .sc-btn-naranja  { background-color:#d96704; color:#fff; border:none; }
-                .sc-btn-naranja:hover { background-color:#b85503; color:#fff; }
-                .sc-mesa-card    { border:none; border-radius:.6rem; }
-                .sc-mesa-titulo  { font-family:'Lobster', cursive; }
-                .sc-mesa-libre   { background-color:#1b4d3e; }   /* verde: LIBRE */
-                .sc-mesa-ocupada { background-color:#590202; }   /* vino: OCUPADA */
-                .sc-mesa-cobrar  { background-color:#d96704; }   /* naranja: POR_COBRAR */
-                .sc-badge-estado { background-color:rgba(255,255,255,.22); font-size:.75rem; }
+                .sc-titulo       {
+                    font-family:'Lobster', cursive;
+                    color:#590202;
+                }
+                .sc-btn-naranja  {
+                    background-color:#d96704;
+                    color:#fff;
+                    border:none;
+                }
+                .sc-btn-naranja:hover {
+                    background-color:#b85503;
+                    color:#fff;
+                }
+                .sc-mesa-card    {
+                    border:none;
+                    border-radius:.6rem;
+                }
+                .sc-mesa-titulo  {
+                    font-family:'Lobster', cursive;
+                }
+                .sc-mesa-libre   {
+                    background-color:#1b4d3e;
+                }   /* verde: LIBRE */
+                .sc-mesa-ocupada {
+                    background-color:#590202;
+                }   /* vino: OCUPADA */
+                .sc-mesa-cobrar  {
+                    background-color:#d96704;
+                }   /* naranja: POR_COBRAR */
+                .sc-badge-estado {
+                    background-color:rgba(255,255,255,.22);
+                    font-size:.75rem;
+                }
             </style>
         </section>
 
