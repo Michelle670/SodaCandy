@@ -67,10 +67,19 @@ public class CocinaController {
     //==========================================================
     @GetMapping("/tablero")
     public String tablero(Model model) {
-        List<PedidoCocina> pedidos = armarTarjetas(EstadoPedido.EN_PREPARACION);
-        model.addAttribute("pedidos", pedidos);
-        model.addAttribute("totalPedidos", pedidos.size());
+        // 1. Cargar las listas de forma independiente para las dos tablas del tablero: PENDIENTE y EN PREPARACION
+        List<PedidoCocina> pedidosPendientes = armarTarjetas(EstadoPedido.PENDIENTE);
+        List<PedidoCocina> pedidosPreparacion = armarTarjetas(EstadoPedido.EN_PREPARACION);
+        
+        // 2. Calcular el total general de pedidos activos en cocina
+        int totalPedidos = pedidosPendientes.size() + pedidosPreparacion.size();
+        
+        // 3. Agregar los atributos al modelo que consumirá el HTML
+        model.addAttribute("pedidosPendientes", pedidosPendientes);
+        model.addAttribute("pedidosPreparacion", pedidosPreparacion);
+        model.addAttribute("totalPedidos", totalPedidos);
         model.addAttribute("modulo", "cocina");   // resalta "Cocina" en el sidebar
+        
         return "cocina/tablero";
     }
 
@@ -97,16 +106,29 @@ public class CocinaController {
         // 3. Pasar la lista unificada y el total al modelo
         model.addAttribute("pedidos", todosLosPedidos);
         model.addAttribute("totalPedidos", todosLosPedidos.size());
-
-        // Mantener la referencia del módulo actual
         model.addAttribute("modulo", "cocina");
 
         return "cocina/historial";
     }
-
+    //==========================================================
+    // POST /cocina/preparar - Cambia el estado de PENDIENTE a EN_PREPARACION
+    //==========================================================
+    @PostMapping("/preparar")
+    public String iniciarPreparacion(@RequestParam Integer idPedido, RedirectAttributes redirectAttributes) {
+        pedidoService.getPedido(idPedido).ifPresentOrElse(
+                pedido -> {
+                    pedido.setEstado(EstadoPedido.EN_PREPARACION);
+                    pedidoService.save(pedido);
+                    redirectAttributes.addFlashAttribute("todoOk", "Pedido #" + idPedido + " pasado a en preparación.");
+                },
+                () -> redirectAttributes.addFlashAttribute("error", "No existe el pedido id " + idPedido)
+        );
+        return "redirect:/cocina/tablero";
+    }
+    
+    
     //==========================================================
     // POST /cocina/listo - HU-18: marcar pedido como listo - Catalogarlo como Servido
-    // Ronald no tiene "cambiarEstado", asi que usamos getPedido + save.
     //==========================================================
     @PostMapping("/listo")
     public String marcarListo(@RequestParam Integer idPedido, RedirectAttributes redirectAttributes) {
@@ -142,7 +164,7 @@ public class CocinaController {
                 String nombre = productoService.getProducto(det.getIdProducto())
                         .map(p -> p.getDescripcion())
                         .orElse("Producto #" + det.getIdProducto());
-                lineas.add(new LineaCocina(det.getCantidad(), nombre, det.getNota()));
+                lineas.add(new LineaCocina(det.getCantidad(), det.getIdPedido(), nombre, det.getNota()));
             }
             resultado.add(new PedidoCocina(pedido.getIdPedido(), pedido.getIdMesa(), lineas));
         }

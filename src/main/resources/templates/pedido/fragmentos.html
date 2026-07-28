@@ -55,40 +55,70 @@
                                     <div class="position-relative">
                                         <img th:src="${p.rutaImagen != null and !p.rutaImagen.empty ? p.rutaImagen : '/img/platillo-defecto.jpg'}" 
                                              class="card-img-top sc-platillo-img" alt="Producto"/>
-                                        <form th:if="${p.disponible}" th:action="@{/pedido/agregarItem}" method="post">
-                                            <input type="hidden" name="idPlatillo" th:value="${p.idProducto}"/>
-                                            <button type="submit" class="btn sc-btn-add position-absolute bottom-0 end-0 m-2 shadow">
-                                                <i class="fa-solid fa-plus text-white"></i>
-                                            </button>
-                                        </form>
+
+                                        <a th:if="${p.disponible}" th:href="@{/pedido/agregar/{id}(id=${p.idProducto}, idMesa=${idMesa})}" class="btn sc-btn-add position-absolute bottom-0 end-0 m-2 shadow text-decoration-none">
+                                            <i class="fa-solid fa-plus text-white"></i>
+                                        </a>
+
                                         <span th:if="${!p.disponible}" class="badge bg-danger position-absolute top-0 end-0 m-2">[[#{producto.agotado}]]</span>
                                     </div>
+
                                     <div class="card-body">
                                         <h4 class="card-title sc-item-nombre" th:text="${p.descripcion}"></h4>
                                         <p class="card-text sc-item-precio fw-bold">&cent; [[${#numbers.formatDecimal(p.precio, 0, 'COMMA', 0, 'POINT')}]]</p>
                                     </div>
+
                                 </div>
 
                             </div>
                         </div>
                     </div>
 
+                    <!-- Sección de detalles del producto -->
                     <div class="col-12 col-lg-4 sc-lateral-detalle p-4 d-flex flex-column" style="background-color: #fbc173; max-height: 100vh;">
-                        <h3 class="sc-lateral-titulo mb-4">[[#{pedido.detalle}]]</h3>
 
+                        <!-- Encabezado de la sección de detalles del producto -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="sc-lateral-titulo mb-0">[[#{pedido.detalle}]]</h3>
+                            <a th:if="${session.itemsPedido != null and !session.itemsPedido.empty}" 
+                               th:href="@{/pedido/limpiar(idMesa=${idMesa})}" class="btn btn-sm btn-outline-dark border-0">
+                                <i class="fa-solid fa-broom"></i> Limpiar
+                            </a>
+                        </div>
+
+                        <!-- Seccion del item agregado -->
                         <div class="flex-grow-1 overflow-y-auto mb-3 pe-1" style="max-height: 60vh;">
-                            <div th:each="item : ${session.itemsPedido}" class="card border-0 rounded-4 p-3 mb-3 shadow-sm bg-white position-relative">
+                            <div th:each="item, stat : ${session.itemsPedido}" class="card border-0 rounded-4 p-3 mb-3 shadow-sm bg-white position-relative">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
-                                        <span class="fw-bold text-dark" th:text="${item.cantidad + ' × ' + item.nombrePlatillo}"></span>
+                                        <span class="fw-bold text-dark" th:text="${item.cantidad + ' × ' + item.nombreProducto}"></span>
                                     </div>
-                                    <span class="fw-bold text-dark">¢[[${#numbers.formatInteger(item.precioTotal, 1, 'POINT')}]]</span>
+
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button class="btn btn-sm btn-light text-muted border-0" type="button" 
+                                                data-bs-toggle="collapse" 
+                                                th:data-bs-target="${'#collapseNota' + stat.index}" 
+                                                aria-expanded="false" 
+                                                th:aria-controls="${'collapseNota' + stat.index}"
+                                                title="Agregar nota/alergia">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+
+                                        <a th:href="@{/pedido/eliminarItem/{index}(index=${stat.index}, idMesa=${idMesa})}" class="text-muted hover-danger">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </a>
+                                    </div>
                                 </div>
 
-                                <div class="text-end">
-                                    <a th:href="@{/pedido/eliminarItem(idPlatillo=${item.idPlatillo})}" class="text-muted hover-danger">
-                                        <i class="fa-regular fa-trash-can"></i>
-                                    </a>
+                                <div th:if="${item.nota != null and !item.nota.empty}" class="small text-danger fst-italic mb-2">
+                                    Nota: <span th:text="${item.nota}"></span>
+                                </div>
+
+                                <div class="collapse mt-2" th:id="${'collapseNota' + stat.index}">
+                                    <form th:action="@{/pedido/actualizarNota/{index}(index=${stat.index}, idMesa=${idMesa})}" method="post" class="input-group input-group-sm">
+                                        <input type="text" name="nota" class="form-control" th:value="${item.nota}" placeholder="Ej: Sin cebolla, extra picante..." />
+                                        <button class="btn btn-outline-secondary" type="submit">[[#{pedido.nota.guardar}]]</button>
+                                    </form>
                                 </div>
                             </div>
 
@@ -97,15 +127,21 @@
                             </div>
                         </div>
 
+
                         <div class="mt-auto border-top border-dark border-opacity-10 pt-3">
+                            <!-- Muestra del costo total del pedido -->
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="fs-5 fw-bold text-dark">[[#{pedido.total}]]:</span>
                                 <span class="sc-total-monto">¢[[${#numbers.formatInteger(totalPedido != null ? totalPedido : 0, 1, 'POINT')}]]</span>
                             </div>
 
+                            <!-- Botón para confirmar el pedido -->
                             <div class="d-grid gap-2">
-                                <form th:action="@{/pedido/confirmar}" method="post">
-                                    <button type="submit" class="btn sc-btn-cocina w-100 py-3 rounded-3 fw-bold text-white shadow-sm">
+                                <form th:action="@{/pedido/generar}" method="post">
+                                    <input type="hidden" name="idMesa" th:value="${idMesa}" />
+
+                                    <button type="submit" class="btn sc-btn-cocina w-100 py-3 rounded-3 fw-bold text-white shadow-sm"
+                                            th:disabled="${session.itemsPedido == null or session.itemsPedido.empty}">
                                         <i class="fa-solid fa-paper-plane"></i> [[#{pedido.enviar.cocina}]]
                                     </button>
                                 </form>
@@ -118,14 +154,6 @@
 
                 </div>
             </div>
-
-            <!-- ============================================================
-             FRAGMENTO PARA HACER CONSULTAS
-             ============================================================ -->
-
-
-
-
 
             <style>
                 .sc-pedido-titulo {
