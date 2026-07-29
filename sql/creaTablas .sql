@@ -247,3 +247,37 @@ INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_historico, 
 INSERT INTO pago (id_pedido, monto, metodo) VALUES
 (1, 8500, 'EFECTIVO'),
 (2, 3100, 'SINPE_MOVIL');
+-- ============================================================
+-- PEDIDO DE PRUEBA para COBRO.
+-- Crea 1 pedido en estado SERVIDO (listo para cobrar) con 2 lineas.
+-- Toma automaticamente un usuario y dos productos existentes.
+-- Correr sobre la base: soda_candy
+-- ============================================================
+
+-- 1) Valores reales que ya existen en la base
+SET @idUsuario = COALESCE((SELECT MIN(id_usuario) FROM usuario), 1);
+SET @p1      = (SELECT id_producto FROM producto ORDER BY id_producto LIMIT 1);
+SET @p2      = (SELECT id_producto FROM producto ORDER BY id_producto LIMIT 1 OFFSET 1);
+SET @precio1 = (SELECT precio FROM producto WHERE id_producto = @p1);
+SET @precio2 = (SELECT precio FROM producto WHERE id_producto = @p2);
+
+-- 2) Inserta el pedido en estado SERVIDO (mesa 9, tipo MESA)
+INSERT INTO pedido (id_usuario, id_mesa, tipo, nombre_cliente, telefono, fecha, estado, total)
+VALUES (@idUsuario, 9, 'MESA', NULL, NULL, NOW(), 'SERVIDO', 0);
+
+SET @idPedido = LAST_INSERT_ID();
+
+-- 3) Inserta 2 lineas de detalle
+INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_historico, nota)
+VALUES (@idPedido, @p1, 2, @precio1, NULL);
+
+INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_historico, nota)
+VALUES (@idPedido, @p2, 1, @precio2, NULL);
+
+-- 4) Actualiza el total del pedido
+UPDATE pedido
+SET total = (2 * @precio1) + (1 * @precio2)
+WHERE id_pedido = @idPedido;
+
+-- 5) Confirmacion
+SELECT @idPedido AS pedido_creado, 'SERVIDO' AS estado, (2 * @precio1) + (1 * @precio2) AS total;

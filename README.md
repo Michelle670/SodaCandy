@@ -27,6 +27,56 @@ Soda Candy es una aplicación web transaccional que digitaliza la operación de 
 | Michelle Guerrero   | feature/michelle-menu      |
 | Sofia Loaiza        | feature/sofia-cocina-cobro |
 
+## Estado del avance por módulo
+
+> **Leyenda:** Listo · En proceso · Pendiente
+>
+> _Última actualización: 06/07/2026_
+
+---
+
+### Módulo MENÚ — Michelle
+
+- **HU-06** · CRUD de Categorías (crear, editar, eliminar; validación de no borrar si tiene productos asociados). — Listo
+- **HU-07** · CRUD de Productos (nombre, precio no negativo, categoría, disponibilidad). — Listo
+- **HU-08** · Marcar producto como *Agotado* (cambio dinámico de etiqueta de disponibilidad). — Listo
+- **HU-09** · Vista de consulta del menú para el salonero (agrupado por categoría, con precios y disponibilidad). — Listo
+
+### Módulo MESAS + EMPLEADOS — Sheilyn
+
+- **HU-02** · Gestión de empleados (crear, editar, desactivar con rol asignado; sin duplicados). — Listo
+- **HU-11** · Apertura de mesa (LIBRE → OCUPADA e inicialización del pedido en curso). — Listo
+- **HU-15** · Panel de estado de las mesas en tiempo real (LIBRE / OCUPADA / POR_COBRAR). — Listo
+
+### Módulo PEDIDOS — Ronald
+
+- **HU-12** · Agregar ítems al pedido (producto y cantidad) con recálculo del total en vivo. — En proceso
+- **HU-13** · Pedidos tipo `PARA_LLEVAR` (sin mesa, capturando nombre y teléfono). — En proceso
+- **HU-14** · Modificación de ítems antes de enviar a cocina (cambiar cantidades, eliminar líneas y recalcular). — En proceso
+- **HU-16** · Enviar pedido a cocina (cambio de estado a `EN_PREPARACION`). — En proceso
+- **HU-21** · Notas por ítem (campo de texto por línea, con resaltado visual para alergias). — En proceso
+
+### Módulo COCINA + COBRO — Sofía
+
+- **HU-17** · Tablero de cocina con actualización automática (polling) de pedidos pendientes y sus notas. — Listo
+- **HU-18** · Marcar pedido como *Listo* (cambio de estado, salida de la cola y registro de hora). — Listo
+- **HU-19** · Registrar método de pago, cambiar estado a `PAGADO`, liberar la mesa y generar tiquete PDF. — Listo
+- **HU-20** · Reporte de ventas del día (total vendido y productos más vendidos). — Pendiente
+
+---
+
+### Transversales (login e idioma)
+
+- **HU-01** · Inicio de sesión con usuario y contraseña según rol. — Pendiente
+- **HU-03** · Restricción por rol (cada rol ve solo sus funciones). — Pendiente
+- **HU-04** · Cierre de sesión. — Listo
+- **HU-05** · Cambio de idioma ES/EN (i18n). — Listo
+- **HU-10** · Menú digital público para el cliente (vista sin login, responsiva). — Listo
+
+---
+
+**Resumen:** 14 de 21 HU listas · Módulo Pedidos (5 HU) en proceso · HU-01 y HU-03 pendientes (login diferido hasta Spring Security).
+
 - La rama main es la rama principal del proyecto. Solo llega código revisado y aprobado por el equipo. Nadie sube cambios directamente a main.
 Reglas del equipo
 
