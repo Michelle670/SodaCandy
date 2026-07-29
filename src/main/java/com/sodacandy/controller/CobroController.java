@@ -78,6 +78,7 @@ public class CobroController {
         model.addAttribute("pendientes", pendientes);
         model.addAttribute("metodos", MetodoPago.values());
         model.addAttribute("idSeleccionado", idPedido);
+        model.addAttribute("modulo", "cobros");
 
         if (idPedido != null) {
             pendientes.stream()

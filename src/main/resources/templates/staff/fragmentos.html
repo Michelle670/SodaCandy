@@ -1,131 +1,161 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"></head>
-<body>
+    <head><meta charset="UTF-8"></head>
+    <body>
 
-<!-- ================================================================= -->
-<!-- ESTILOS DEL SHELL DE STAFF                                         -->
-<!-- Van embebidos aqui (dentro del sidebar) para que el fragmento sea  -->
-<!-- autocontenido: cualquier pagina que incluya el sidebar hereda el   -->
-<!-- estilo, sin tener que tocar el <head>. Colores de marca por codigo -->
-<!-- Estructura = Bootstrap puro.                                       -->
-<!-- ================================================================= -->
+        <!-- ================================================================= -->
+        <!-- ESTILOS DEL SHELL DE STAFF                                         -->
+        <!-- Van embebidos aqui (dentro del sidebar) para que el fragmento sea  -->
+        <!-- autocontenido: cualquier pagina que incluya el sidebar hereda el   -->
+        <!-- estilo, sin tener que tocar el <head>. Colores de marca por codigo -->
+        <!-- Estructura = Bootstrap puro.                                       -->
+        <!-- ================================================================= -->
 
-<!-- =============================== -->
-<!-- TOPBAR (barra superior vino)    -->
-<!-- =============================== -->
-<nav th:fragment="headerStaff" class="navbar sc-bg-vino px-4">
-    <a class="navbar-brand text-white sc-logo mb-0" th:href="@{/home}">Soda Candy</a>
-    <div class="d-flex align-items-center gap-3">
-        <!-- Selector de idioma (HU-05) -->
-        <div class="dropdown">
-            <a class="nav-link dropdown-toggle text-white" href="#" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">[[#{staff.idioma}]]</a>
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" th:href="@{''(lang='es')}">Español</a></li>
-                <li><a class="dropdown-item" th:href="@{''(lang='en')}">English</a></li>
-            </ul>
-        </div>
-        <!-- Perfil activo. Hoy fijo en "Administracion"; cuando exista
-             Spring Security mostrara el rol real del usuario logueado. -->
-        <span class="badge sc-bg-naranja py-2 px-3">[[#{staff.perfil}]]</span>
-    </div>
-</nav>
+        <!-- =============================== -->
+        <!-- TOPBAR (barra superior vino)    -->
+        <!-- =============================== -->
+        <nav th:fragment="headerStaff" class="navbar sc-bg-vino px-4">
+            <a class="navbar-brand text-white sc-logo mb-0" th:href="@{/home}">Soda Candy</a>
+            <div class="d-flex align-items-center gap-3">
+                <!-- Selector de idioma (HU-05) -->
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">[[#{staff.idioma}]]</a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" th:href="@{''(lang='es')}">Español</a></li>
+                        <li><a class="dropdown-item" th:href="@{''(lang='en')}">English</a></li>
+                    </ul>
+                </div>
+                <!-- Perfil activo. Hoy fijo en "Administracion"; cuando exista
+                     Spring Security mostrara el rol real del usuario logueado. -->
+                <span class="badge sc-bg-naranja py-2 px-3">[[#{staff.perfil}]]</span>
+            </div>
+        </nav>
 
-<!-- =============================== -->
-<!-- SIDEBAR (menu lateral de modulos) -->
-<!-- =============================== -->
-<aside th:fragment="sidebarStaff" class="sc-bg-vino d-flex flex-column p-3 sc-sidebar">
+        <!-- =============================== -->
+        <!-- SIDEBAR (menu lateral de modulos) -->
+        <!-- =============================== -->
+        <aside th:fragment="sidebarStaff" class="sc-bg-vino d-flex flex-column p-3 sc-sidebar">
 
-    <!-- ============================================================= -->
-    <!-- VISTA ACTUAL: perfil ADMINISTRADOR (ve todos los modulos).    -->
-    <!-- El filtrado por rol (SALONERO solo Mesas/Cocina, etc.) se     -->
-    <!-- activara cuando se implemente Spring Security.                -->
-    <!-- HU-01/03/04 diferidas: el profe aun no da Security.           -->
-    <!-- Cuando llegue: buscar "TODO seguridad" y activar cada regla.  -->
-    <!-- ============================================================= -->
+            <!-- ============================================================= -->
+            <!-- VISTA ACTUAL: perfil ADMINISTRADOR (ve todos los modulos).    -->
+            <!-- El filtrado por rol (SALONERO solo Mesas/Cocina, etc.) se     -->
+            <!-- activara cuando se implemente Spring Security.                -->
+            <!-- HU-01/03/04 diferidas: el profe aun no da Security.           -->
+            <!-- Cuando llegue: buscar "TODO seguridad" y activar cada regla.  -->
+            <!-- ============================================================= -->
 
-    <nav class="nav flex-column flex-grow-1 gap-1">
+            <nav class="nav flex-column flex-grow-1 gap-1">
 
-        <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
-        <a class="sc-side-link" th:href="@{/producto/listado}"
-           th:classappend="${modulo == 'productos'} ? 'sc-side-active' : ''">
-            <i class="fa-solid fa-clipboard-list"></i> [[#{staff.productos}]]
-        </a>
+                <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
+                <a class="sc-side-link" th:href="@{/producto/listado}"
+                   th:classappend="${modulo == 'productos'} ? 'sc-side-active' : ''">
+                    <i class="fa-solid fa-clipboard-list"></i> [[#{staff.productos}]]
+                </a>
 
-        <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
-        <a class="sc-side-link" th:href="@{/categoria/listado}"
-           th:classappend="${modulo == 'categorias'} ? 'sc-side-active' : ''">
-            <i class="fa-solid fa-folder"></i> [[#{staff.categorias}]]
-        </a>
+                <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
+                <a class="sc-side-link" th:href="@{/categoria/listado}"
+                   th:classappend="${modulo == 'categorias'} ? 'sc-side-active' : ''">
+                    <i class="fa-solid fa-folder"></i> [[#{staff.categorias}]]
+                </a>
 
-        <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
-        <a class="sc-side-link" th:href="@{/usuario/listado}"
-           th:classappend="${modulo == 'empleados'} ? 'sc-side-active' : ''">
-            <i class="fa-solid fa-user"></i> [[#{staff.empleados}]]
-        </a>
+                <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
+                <a class="sc-side-link" th:href="@{/usuario/listado}"
+                   th:classappend="${modulo == 'empleados'} ? 'sc-side-active' : ''">
+                    <i class="fa-solid fa-user"></i> [[#{staff.empleados}]]
+                </a>
 
-        <!-- TODO seguridad: sec:authorize="hasAnyRole('ADMINISTRADOR','COCINA')" -->
-        <a class="sc-side-link" th:href="@{/cocina/tablero}"
-           th:classappend="${modulo == 'cocina'} ? 'sc-side-active' : ''">
-            <i class="fa-solid fa-utensils"></i> [[#{staff.cocina}]]
-        </a>
+                <!-- TODO seguridad: sec:authorize="hasAnyRole('ADMINISTRADOR','COCINA')" -->
+                <a class="sc-side-link" th:href="@{/cocina/tablero}"
+                   th:classappend="${modulo == 'cocina'} ? 'sc-side-active' : ''">
+                    <i class="fa-solid fa-utensils"></i> [[#{staff.cocina}]]
+                </a>
 
-        <!-- TODO seguridad: sec:authorize="hasAnyRole('ADMINISTRADOR','SALONERO')" -->
-        <a class="sc-side-link" th:href="@{/mesa/listado}"
-           th:classappend="${modulo == 'mesas'} ? 'sc-side-active' : ''">
-            <i class="fa-solid fa-chair"></i> [[#{staff.mesas}]]
-        </a>
+                <a class="sc-side-link" th:href="@{/cobro/listado}"
+                   th:classappend="${modulo == 'cobros'} ? 'sc-side-active' : ''">
+                    <i class="fa-solid fa-cash-register"></i> [[#{staff.cobros}]]
+                </a>
 
-        <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
-        <a class="sc-side-link" th:href="@{/reporte/ventas}"
-           th:classappend="${modulo == 'reportes'} ? 'sc-side-active' : ''">
-            <i class="fa-solid fa-chart-column"></i> [[#{staff.reportes}]]
-        </a>
+                <!-- TODO seguridad: sec:authorize="hasAnyRole('ADMINISTRADOR','SALONERO')" -->
+                <a class="sc-side-link" th:href="@{/mesa/listado}"
+                   th:classappend="${modulo == 'mesas'} ? 'sc-side-active' : ''">
+                    <i class="fa-solid fa-chair"></i> [[#{staff.mesas}]]
+                </a>
 
-    </nav>
+                <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
+                <a class="sc-side-link" th:href="@{/reporte/ventas}"
+                   th:classappend="${modulo == 'reportes'} ? 'sc-side-active' : ''">
+                    <i class="fa-solid fa-chart-column"></i> [[#{staff.reportes}]]
+                </a>
 
-    <!-- Acciones inferiores -->
-    <div class="border-top border-light border-opacity-25 pt-3 mt-3">
-        <a class="sc-side-link" th:href="@{/home}">
-            <i class="fa-solid fa-arrow-left"></i> [[#{staff.volver}]]
-        </a>
-        <!-- TODO seguridad: cuando exista login, esto hara logout real (POST /logout).
-             Por ahora "salir" regresa al sitio publico. -->
-        <a class="sc-side-link" th:href="@{/}">
-            <i class="fa-solid fa-right-from-bracket"></i> [[#{staff.salir}]]
-        </a>
-    </div>
+            </nav>
 
-    <!-- Estilos del shell (embebidos: hacen el fragmento autocontenido) -->
-    <style>
-        .sc-bg-vino    { background-color:#590202 !important; }
-        .sc-bg-naranja { background-color:#d96704 !important; }
-        .sc-logo       { font-family:'Lobster', cursive; font-size:1.6rem; }
-        .sc-sidebar    { width:240px; }
-        .sc-side-link  {
-            display:flex; align-items:center; gap:.6rem;
-            color:#fff; padding:.6rem .9rem; border-radius:.4rem;
-            text-decoration:none; transition:background-color .15s ease;
-        }
-        .sc-side-link i { width:20px; text-align:center; }
-        .sc-side-link:hover { background-color:rgba(255,255,255,.12); color:#fff; }
-        /* Modulo activo: barra naranja a la izquierda + fondo tenue */
-        .sc-side-active {
-            background-color:rgba(255,255,255,.14);
-            border-left:4px solid #d96704; color:#fff;
-        }
-        /* En movil el sidebar pasa a ancho completo */
-        @media (max-width: 768px) { .sc-sidebar { width:100%; } }
-    </style>
-</aside>
+            <!-- Acciones inferiores -->
+            <div class="border-top border-light border-opacity-25 pt-3 mt-3">
+                <a class="sc-side-link" th:href="@{/home}">
+                    <i class="fa-solid fa-arrow-left"></i> [[#{staff.volver}]]
+                </a>
+                <!-- TODO seguridad: cuando exista login, esto hara logout real (POST /logout).
+                     Por ahora "salir" regresa al sitio publico. -->
+                <a class="sc-side-link" th:href="@{/}">
+                    <i class="fa-solid fa-right-from-bracket"></i> [[#{staff.salir}]]
+                </a>
+            </div>
 
-<!-- =============================== -->
-<!-- FOOTER de staff                 -->
-<!-- =============================== -->
-<footer th:fragment="footerStaff" class="text-center py-3 text-muted border-top">
-    <small>&copy; 2026 Soda Candy &middot; [[#{staff.footer}]]</small>
-</footer>
+            <!-- Estilos del shell (embebidos: hacen el fragmento autocontenido) -->
+            <style>
+                .sc-bg-vino    {
+                    background-color:#590202 !important;
+                }
+                .sc-bg-naranja {
+                    background-color:#d96704 !important;
+                }
+                .sc-logo       {
+                    font-family:'Lobster', cursive;
+                    font-size:1.6rem;
+                }
+                .sc-sidebar    {
+                    width:240px;
+                }
+                .sc-side-link  {
+                    display:flex;
+                    align-items:center;
+                    gap:.6rem;
+                    color:#fff;
+                    padding:.6rem .9rem;
+                    border-radius:.4rem;
+                    text-decoration:none;
+                    transition:background-color .15s ease;
+                }
+                .sc-side-link i {
+                    width:20px;
+                    text-align:center;
+                }
+                .sc-side-link:hover {
+                    background-color:rgba(255,255,255,.12);
+                    color:#fff;
+                }
+                /* Modulo activo: barra naranja a la izquierda + fondo tenue */
+                .sc-side-active {
+                    background-color:rgba(255,255,255,.14);
+                    border-left:4px solid #d96704;
+                    color:#fff;
+                }
+                /* En movil el sidebar pasa a ancho completo */
+                @media (max-width: 768px) {
+                    .sc-sidebar {
+                        width:100%;
+                    }
+                }
+            </style>
+        </aside>
 
-</body>
+        <!-- =============================== -->
+        <!-- FOOTER de staff                 -->
+        <!-- =============================== -->
+        <footer th:fragment="footerStaff" class="text-center py-3 text-muted border-top">
+            <small>&copy; 2026 Soda Candy &middot; [[#{staff.footer}]]</small>
+        </footer>
+
+    </body>
 </html>
