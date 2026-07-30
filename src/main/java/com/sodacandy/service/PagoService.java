@@ -9,6 +9,12 @@ import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.sodacandy.domain.LineaReporte;
+import com.sodacandy.domain.MetodoPago;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 //==============================================================================
 // CURSO : APLICACIONES WEB Y PATRONES
 // PROF: WILBERT MOLINA
@@ -50,7 +56,28 @@ public class PagoService {
     public Optional<Pago> getPago(Integer idPago) {
         return pagoRepository.findById(idPago);
     }
+    //==========================================================
+    // REPORTE DE VENTAS (HU-20)
+    // Agrupa los pagos por metodo y calcula total y cantidad.
+    // Reutiliza getPagos(); no requiere consulta nueva.
+    //==========================================================
 
+    @Transactional(readOnly = true)
+    public List<LineaReporte> getReporteVentas() {
+        // metodo -> [cantidad, total]
+        Map<MetodoPago, LineaReporte> mapa = new LinkedHashMap<>();
+        // Inicializa todos los metodos en cero (asi salen aunque no tengan ventas)
+        for (MetodoPago m : MetodoPago.values()) {
+            mapa.put(m, new LineaReporte(m.name(), 0, BigDecimal.ZERO));
+        }
+        // Suma cada pago a su metodo
+        for (Pago pago : pagoRepository.findAll()) {
+            LineaReporte linea = mapa.get(pago.getMetodo());
+            linea.setCantidad(linea.getCantidad() + 1);
+            linea.setTotal(linea.getTotal().add(pago.getMonto()));
+        }
+        return new ArrayList<>(mapa.values());
+    }
     //==========================================================
     // READ - Por pedido (findBy del repositorio)
     // Hay un solo pago por pedido: sirve para saber si un pedido

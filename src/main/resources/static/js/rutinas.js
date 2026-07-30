@@ -1,4 +1,4 @@
-// funcion para hacer un preview de una imagen 
+// funcion para hacer un preview de una imagen
 function mostrarImagen(input) {
     if (input.files && input.files[0]) {
         const imagen = input.files[0];
@@ -18,7 +18,7 @@ function mostrarImagen(input) {
 //Para insertar información en el modal según el registro...
 document.addEventListener('DOMContentLoaded', function () {
     const confirmModal = document.getElementById('confirmModal');
-    
+
     if (confirmModal) {
         confirmModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
