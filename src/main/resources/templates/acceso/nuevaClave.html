@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{general/fragmentos :: head}"></head>
+<body>
+
+<div th:with="seccion='login'">
+    <header th:replace="~{general/fragmentos :: headerPublico}"></header>
+</div>
+
+<div class="row my-5">
+    <div class="col-md-4 offset-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-white text-center" style="background-color:var(--soda-vino);">
+                <h2 class="mb-0">[[#{acceso.nuevaClave.titulo}]]</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST" th:action="@{/acceso/recuperar/confirmar}">
+                    <input type="hidden" name="username" th:value="${username}"/>
+                    <input type="hidden" name="token" th:value="${token}"/>
+                    <div class="mb-3">
+                        <label class="form-label">[[#{acceso.nuevaClave.nueva}]]</label>
+                        <input class="form-control" type="password" name="password" minlength="6" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">[[#{acceso.nuevaClave.confirmar}]]</label>
+                        <input class="form-control" type="password" name="confirmarPassword" minlength="6" required/>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button class="btn text-white" style="background-color:var(--soda-naranja);" type="submit">
+                            <i class="fa-solid fa-key me-1"></i>[[#{acceso.nuevaClave.guardar}]]
+                        </button>
+                    </div>
+                </form>
+                <section th:replace="~{general/fragmentos :: mostrarToast}"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{general/fragmentos :: footer}"></footer>
+</body>
+</html>

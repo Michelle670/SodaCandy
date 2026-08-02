@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{general/fragmentos :: head}"></head>
+<body>
+
+<div th:with="seccion='login'">
+    <header th:replace="~{general/fragmentos :: headerPublico}"></header>
+</div>
+
+<div class="row my-5">
+    <div class="col-md-4 offset-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-white text-center" style="background-color:var(--soda-vino);">
+                [[${titulo}]]
+            </div>
+            <div class="card-body text-center">
+                <p>[[${mensaje}]]</p>
+                <a th:href="@{/login}" class="btn btn-outline-secondary btn-sm mt-2">
+                    <i class="fa-solid fa-arrow-left"></i> [[#{accion.regresar}]]
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{general/fragmentos :: footer}"></footer>
+</body>
+</html>

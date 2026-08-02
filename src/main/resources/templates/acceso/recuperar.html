@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{general/fragmentos :: head}"></head>
+<body>
+
+<div th:with="seccion='login'">
+    <header th:replace="~{general/fragmentos :: headerPublico}"></header>
+</div>
+
+<div class="row my-5">
+    <div class="col-md-4 offset-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header text-white text-center" style="background-color:var(--soda-vino);">
+                <h2 class="mb-0">[[#{acceso.recuperar.titulo}]]</h2>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">[[#{acceso.recuperar.ayuda}]]</p>
+                <form method="POST" th:action="@{/acceso/recuperar}">
+                    <div class="mb-3">
+                        <label class="form-label">[[#{login.username}]]</label>
+                        <input class="form-control" type="text" name="username" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">[[#{acceso.correo}]]</label>
+                        <input class="form-control" type="email" name="correo" required/>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button class="btn text-white" style="background-color:var(--soda-naranja);" type="submit">
+                            <i class="fa-solid fa-paper-plane me-1"></i>[[#{acceso.recuperar.enviar}]]
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <a th:href="@{/login}"><i class="fa-solid fa-arrow-left"></i> [[#{accion.regresar}]]</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="~{general/fragmentos :: footer}"></footer>
+</body>
+</html>

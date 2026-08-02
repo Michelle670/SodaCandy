@@ -72,9 +72,8 @@
                                 </svg>English</a></li>
                         </ul>
                     </li>
-                    <!-- Acceso Staff: apuntara a /login cuando Ronald agregue Spring Security -->
                     <li class="nav-item ms-lg-2">
-                        <a class="btn btn-acceso-staff btn-sm" th:href="@{/}">
+                        <a class="btn btn-acceso-staff btn-sm" th:href="@{/login}">
                             <i class="fa-solid fa-lock me-1"></i>[[#{plantilla.accesoStaff}]]</a>
                     </li>
                     <!-- Aqui iran los controles de sesion (Entrar / usuario / Salir) cuando se agregue la seguridad -->
@@ -207,7 +206,7 @@
                         </ul>
                     </li>
                     <li class="nav-item ms-lg-2">
-                        <a class="btn btn-sm btn-staff-pub" th:href="@{/home}">
+                        <a class="btn btn-sm btn-staff-pub" th:href="@{/login}">
                             <i class="fa-solid fa-lock me-1"></i>[[#{plantilla.accesoStaff}]]</a>
                     </li>
                 </ul>
