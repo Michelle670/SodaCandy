@@ -30,7 +30,8 @@ public class ProjectConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("index");
         registry.addViewController("/index").setViewName("index");
-        // El mapeo de "/login" se agregara junto con Spring Security (lo vera el profe).
+        registry.addViewController("/login").setViewName("login");
+        registry.addViewController("/acceso_denegado").setViewName("acceso_denegado");
     }
 
     @Bean
