@@ -74,6 +74,13 @@
                                            maxlength="1024" placeholder="https://..."/>
                                 </div>
                                 <div class="mb-3">
+                                    <label>[[#{usuario.rol}]]</label>
+                                    <select name="idRol" class="form-select">
+                                        <option value="">[[#{usuario.sinRol}]]</option>
+                                        <option th:each="r : ${roles}" th:value="${r.idRol}" th:text="${r.rol}"></option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
                                     <label>[[#{usuario.activo}]]</label>
                                     <input type="checkbox" name="activo" class="form-check-input" checked="checked"/>
                                 </div>
@@ -120,8 +127,13 @@
                                             <td>[[${u.nombre}]] [[${u.apellidos}]]</td>
                                             <td>[[${u.username}]]</td>
                                             <td>[[${u.correo}]]</td>
-                                            <!-- Rol: por ahora informativo. Se asignara con Spring Security -->
-                                            <td><span class="badge bg-secondary">[[#{usuario.sinRol}]]</span></td>
+                                            <!-- Rol real, asignado desde el dropdown del formulario -->
+                                            <td>
+                                                <span th:if="${rolesPorUsuario.get(u.idUsuario) != null}"
+                                                      class="badge bg-info" th:text="${rolesPorUsuario.get(u.idUsuario)}"></span>
+                                                <span th:unless="${rolesPorUsuario.get(u.idUsuario) != null}"
+                                                      class="badge bg-secondary">[[#{usuario.sinRol}]]</span>
+                                            </td>
                                             <!-- HU-02: badge de estado activo/inactivo -->
                                             <td>
                                                 <span th:if="${u.activo}" class="badge bg-success">
@@ -243,7 +255,7 @@
                                             <div class="col-md-6 mb-3">
                                                 <label>[[#{usuario.password}]]</label>
                                                 <input type="password" class="form-control" name="password"
-                                                       th:field="*{password}" maxlength="512" required="true"/>
+                                                       maxlength="100" placeholder="Dejar en blanco para no cambiarla"/>
                                             </div>
                                         </div>
                                         <div class="row">
@@ -262,6 +274,14 @@
                                             <label>[[#{usuario.rutaImagen}]]</label>
                                             <input type="text" class="form-control" name="rutaImagen"
                                                    th:field="*{rutaImagen}" maxlength="1024"/>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>[[#{usuario.rol}]]</label>
+                                            <select name="idRol" class="form-select">
+                                                <option value="">[[#{usuario.sinRol}]]</option>
+                                                <option th:each="r : ${roles}" th:value="${r.idRol}" th:text="${r.rol}"
+                                                        th:selected="${r.idRol == idRolActual}"></option>
+                                            </select>
                                         </div>
                                         <div class="mb-3">
                                             <label>[[#{usuario.activo}]]</label>
