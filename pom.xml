@@ -41,9 +41,21 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- NOTA: La seguridad (Spring Security) se agregara cuando el profe la enseñe.
-        Ronald la implementara siguiendo el estilo exacto del curso. Por ahora el
-        andamio queda sin login y todas las pantallas son de acceso libre. -->
+        <!-- Spring Security: login, logout y encriptado de contraseñas (BCrypt) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <!-- Integra Spring Security con Thymeleaf (sec:authorize, sec:authentication) -->
+        <dependency>
+            <groupId>org.thymeleaf.extras</groupId>
+            <artifactId>thymeleaf-extras-springsecurity6</artifactId>
+        </dependency>
+        <!-- Envio de correo: recuperar contraseña -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
