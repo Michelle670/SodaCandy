@@ -21,7 +21,6 @@ import lombok.Data;
 public class Usuario implements Serializable
 {
     private static final long serialVersionUID = 1L;
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idUsuario;
@@ -60,4 +59,11 @@ public class Usuario implements Serializable
     private String rutaImagen;
     //========================================================
     private boolean activo;
+    //========================================================
+    //Usados solo por "olvide mi contraseña": token de un solo uso y su vencimiento
+    @Column(length = 64)
+    private String tokenReset;
+    //========================================================
+    @Column
+    private java.time.LocalDateTime tokenResetExpira;
 }

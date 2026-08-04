@@ -1,4 +1,6 @@
-
+//==============================================================================
+// IMPORTES
+//==============================================================================
 package com.sodacandy.repository;
 
 import com.sodacandy.domain.UsuarioRol;
@@ -11,4 +13,7 @@ import org.springframework.stereotype.Repository;
 public interface UsuarioRolRepository extends JpaRepository<UsuarioRol, UsuarioRolPK>
 {
     public List<UsuarioRol> findByIdUsuario(Integer idUsuario);
+
+    //Borra el/los roles que ya tenia el empleado, para asignarle uno nuevo desde el dropdown
+    public void deleteByIdUsuario(Integer idUsuario);
 }

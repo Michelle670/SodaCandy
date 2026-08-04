@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{general/fragmentos :: head}"></head>
+<body>
+<div th:with="seccion='login'">
+    <header th:replace="~{general/fragmentos :: headerPublico}"></header>
+</div>
+<div class="row my-5">
+    <div class="col-md-6 offset-md-3 text-center">
+        <i class="fa-solid fa-ban fa-3x text-danger mb-3"></i>
+        <h2>[[#{acceso.denegado.titulo}]]</h2>
+        <p>[[#{acceso.denegado.texto}]]</p>
+        <a th:href="@{/home}" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left"></i> [[#{accion.regresar}]]</a>
+    </div>
+</div>
+<footer th:replace="~{general/fragmentos :: footer}"></footer>
+</body>
+</html>

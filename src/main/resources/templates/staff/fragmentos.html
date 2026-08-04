@@ -95,11 +95,12 @@
                 <a class="sc-side-link" th:href="@{/home}">
                     <i class="fa-solid fa-arrow-left"></i> [[#{staff.volver}]]
                 </a>
-                <!-- TODO seguridad: cuando exista login, esto hara logout real (POST /logout).
-                     Por ahora "salir" regresa al sitio publico. -->
-                <a class="sc-side-link" th:href="@{/}">
-                    <i class="fa-solid fa-right-from-bracket"></i> [[#{staff.salir}]]
-                </a>
+                <!-- Logout real: envia POST a /logout, Spring Security cierra la sesion -->
+                <form method="POST" th:action="@{/logout}" class="m-0">
+                    <button type="submit" class="sc-side-link border-0 w-100 text-start bg-transparent">
+                        <i class="fa-solid fa-right-from-bracket"></i> [[#{staff.salir}]]
+                    </button>
+                </form>
             </div>
 
             <!-- Estilos del shell (embebidos: hacen el fragmento autocontenido) -->

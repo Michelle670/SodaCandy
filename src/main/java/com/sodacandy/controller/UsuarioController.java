@@ -3,9 +3,13 @@
 //==============================================================================
 package com.sodacandy.controller;
 import com.sodacandy.domain.Usuario;
+import com.sodacandy.service.RolService;
 import com.sodacandy.service.UsuarioService;
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
@@ -28,10 +32,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final RolService rolService;
     private final MessageSource messageSource;
 
-    public UsuarioController(UsuarioService usuarioService, MessageSource messageSource) {
+    public UsuarioController(UsuarioService usuarioService, RolService rolService, MessageSource messageSource) {
         this.usuarioService = usuarioService;
+        this.rolService = rolService;
         this.messageSource = messageSource;
     }
 
@@ -43,6 +49,14 @@ public class UsuarioController {
         model.addAttribute("totalUsuarios", usuarios.size());
         model.addAttribute("usuario", new Usuario());
         model.addAttribute("modulo", "empleados");
+        //Roles disponibles para el dropdown del modal "Agregar"
+        model.addAttribute("roles", rolService.getRoles());
+        //Rol actual de cada empleado, para mostrarlo en la columna Rol de la tabla
+        Map<Integer, String> rolesPorUsuario = new HashMap<>();
+        for (Usuario u : usuarios) {
+            rolesPorUsuario.put(u.getIdUsuario(), usuarioService.getNombreRolUsuario(u.getIdUsuario()));
+        }
+        model.addAttribute("rolesPorUsuario", rolesPorUsuario);
         return "/usuario/listado";
     }
 
@@ -58,16 +72,23 @@ public class UsuarioController {
         }
         model.addAttribute("usuario", opt.get());
         model.addAttribute("modulo", "empleados");
+        //Roles disponibles para el dropdown, y el rol actual para preseleccionarlo
+        model.addAttribute("roles", rolService.getRoles());
+        model.addAttribute("idRolActual", usuarioService.getIdRolUsuario(idUsuario));
         return "/usuario/modifica";
     }
 
-    // Guarda un empleado nuevo o actualiza uno existente.
+    // Guarda un empleado nuevo o actualiza uno existente, junto con el rol elegido en el dropdown.
     @PostMapping("/guardar")
-    public String guardar(@Valid Usuario usuario, RedirectAttributes redirectAttributes) {
+    public String guardar(@Valid Usuario usuario,
+            @RequestParam(required = false) Integer idRol,
+            RedirectAttributes redirectAttributes) {
         String titulo = "todoOk";
         String detalle = "mensaje.actualizado";
         try {
             usuarioService.save(usuario);
+            //Al guardar, JPA ya dejo el id generado dentro de "usuario" (sea nuevo o existente)
+            usuarioService.asignarRol(usuario.getIdUsuario(), idRol);
         } catch (IllegalStateException e) {
             titulo = "error";
             detalle = "usuario.error02";
