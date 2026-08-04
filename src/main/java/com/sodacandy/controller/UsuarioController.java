@@ -7,7 +7,6 @@ import com.sodacandy.service.RolService;
 import com.sodacandy.service.UsuarioService;
 import jakarta.validation.Valid;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head><meta charset="UTF-8"></head>
     <body>
 
@@ -26,9 +27,11 @@
                         <li><a class="dropdown-item" th:href="@{''(lang='en')}">English</a></li>
                     </ul>
                 </div>
-                <!-- Perfil activo. Hoy fijo en "Administracion"; cuando exista
-                     Spring Security mostrara el rol real del usuario logueado. -->
-                <span class="badge sc-bg-naranja py-2 px-3">[[#{staff.perfil}]]</span>
+                
+                <!-- Rol del usuario autenticado con Spring Security -->
+                <span class="badge sc-bg-naranja py-2 px-3" 
+                      th:with="rolBruto=${#authentication.principal.authorities}, rolLimpio=${#strings.replace(#strings.replace(#strings.listJoin(rolBruto, ', '), 'ROLE_', ''), '[', '').replace(']', '')}"
+                      th:text="${rolLimpio}"></span>
             </div>
         </nav>
 
@@ -37,36 +40,28 @@
         <!-- =============================== -->
         <aside th:fragment="sidebarStaff" class="sc-bg-vino d-flex flex-column p-3 sc-sidebar">
 
-            <!-- ============================================================= -->
-            <!-- VISTA ACTUAL: perfil ADMINISTRADOR (ve todos los modulos).    -->
-            <!-- El filtrado por rol (SALONERO solo Mesas/Cocina, etc.) se     -->
-            <!-- activara cuando se implemente Spring Security.                -->
-            <!-- HU-01/03/04 diferidas: el profe aun no da Security.           -->
-            <!-- Cuando llegue: buscar "TODO seguridad" y activar cada regla.  -->
-            <!-- ============================================================= -->
-
             <nav class="nav flex-column flex-grow-1 gap-1">
 
-                <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
-                <a class="sc-side-link" th:href="@{/producto/listado}"
+                <!-- Acceso permitido solo a administradores -->
+                <a class="sc-side-link" th:href="@{/producto/listado}" sec:authorize="hasAnyRole('ADMINISTRADOR','COCINA')"
                    th:classappend="${modulo == 'productos'} ? 'sc-side-active' : ''">
                     <i class="fa-solid fa-clipboard-list"></i> [[#{staff.productos}]]
                 </a>
 
-                <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
-                <a class="sc-side-link" th:href="@{/categoria/listado}"
+                <!-- Acceso permitido solo a administradores -->
+                <a class="sc-side-link" th:href="@{/categoria/listado}" sec:authorize="hasRole('ADMINISTRADOR')"
                    th:classappend="${modulo == 'categorias'} ? 'sc-side-active' : ''">
                     <i class="fa-solid fa-folder"></i> [[#{staff.categorias}]]
                 </a>
 
-                <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
-                <a class="sc-side-link" th:href="@{/usuario/listado}"
+                <!-- Acceso permitido solo a administradores -->
+                <a class="sc-side-link" th:href="@{/usuario/listado}" sec:authorize="hasRole('ADMINISTRADOR')"
                    th:classappend="${modulo == 'empleados'} ? 'sc-side-active' : ''">
                     <i class="fa-solid fa-user"></i> [[#{staff.empleados}]]
                 </a>
 
-                <!-- TODO seguridad: sec:authorize="hasAnyRole('ADMINISTRADOR','COCINA')" -->
-                <a class="sc-side-link" th:href="@{/cocina/tablero}"
+                <!-- Acceso permitido solo a administradores y cocineros -->
+                <a class="sc-side-link" th:href="@{/cocina/tablero}" sec:authorize="hasAnyRole('ADMINISTRADOR','COCINA')"
                    th:classappend="${modulo == 'cocina'} ? 'sc-side-active' : ''">
                     <i class="fa-solid fa-utensils"></i> [[#{staff.cocina}]]
                 </a>
@@ -76,14 +71,14 @@
                     <i class="fa-solid fa-cash-register"></i> [[#{staff.cobros}]]
                 </a>
 
-                <!-- TODO seguridad: sec:authorize="hasAnyRole('ADMINISTRADOR','SALONERO')" -->
-                <a class="sc-side-link" th:href="@{/mesa/listado}"
+                <!-- Acceso permitido solo a administradores y saloneros -->
+                <a class="sc-side-link" th:href="@{/mesa/listado}" sec:authorize="hasAnyRole('ADMINISTRADOR','SALONERO')"
                    th:classappend="${modulo == 'mesas'} ? 'sc-side-active' : ''">
                     <i class="fa-solid fa-chair"></i> [[#{staff.mesas}]]
                 </a>
 
-                <!-- TODO seguridad: sec:authorize="hasRole('ADMINISTRADOR')" -->
-                <a class="sc-side-link" th:href="@{/reporte/ventas}"
+                <!-- Acceso permitido solo a administradores -->
+                <a class="sc-side-link" th:href="@{/reporte/ventas}" sec:authorize="hasRole('ADMINISTRADOR')"
                    th:classappend="${modulo == 'reportes'} ? 'sc-side-active' : ''">
                     <i class="fa-solid fa-chart-column"></i> [[#{staff.reportes}]]
                 </a>

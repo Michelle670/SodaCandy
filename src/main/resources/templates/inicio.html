@@ -88,7 +88,7 @@
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 
                 <!-- MESAS -->
-                <div class="col">
+                <div class="col" sec:authorize="hasAnyRole('ADMINISTRADOR','SALONERO')">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-rojo text-white text-center py-3">
                             <i class="fa-solid fa-chair fa-lg"></i>
@@ -104,7 +104,7 @@
                 </div>
 
                 <!-- COCINA -->
-                <div class="col">
+                <div class="col" sec:authorize="hasAnyRole('ADMINISTRADOR','COCINA')">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-naranja text-white text-center py-3">
                             <i class="fa-solid fa-utensils fa-lg"></i>
@@ -120,7 +120,7 @@
                 </div>
 
                 <!-- PRODUCTOS -->
-                <div class="col">
+                <div class="col" sec:authorize="hasAnyRole('ADMINISTRADOR','COCINA')">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-vino text-white text-center py-3">
                             <i class="fa-solid fa-clipboard-list fa-lg"></i>
@@ -135,8 +135,8 @@
                     </div>
                 </div>
 
-                <!-- CATEGORIAS (fondo durazno claro -> icono en texto oscuro) -->
-                <div class="col">
+                <!-- CATEGORIAS -->
+                <div class="col" sec:authorize="hasRole('ADMINISTRADOR')">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-durazno text-vino text-center py-3">
                             <i class="fa-solid fa-folder fa-lg"></i>
@@ -152,7 +152,7 @@
                 </div>
 
                 <!-- EMPLEADOS -->
-                <div class="col">
+                <div class="col" sec:authorize="hasRole('ADMINISTRADOR')">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-vino text-white text-center py-3">
                             <i class="fa-solid fa-user fa-lg"></i>
@@ -168,7 +168,7 @@
                 </div>
 
                 <!-- REPORTES -->
-                <div class="col">
+                <div class="col" sec:authorize="hasRole('ADMINISTRADOR')">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-verde text-white text-center py-3">
                             <i class="fa-solid fa-chart-column fa-lg"></i>
@@ -178,6 +178,22 @@
                             <p class="card-text flex-grow-1">[[#{inicio.reportes.desc}]]</p>
                             <a th:href="@{/reporte/ventas}" class="btn btn-vino w-100">
                                 [[#{inicio.reportes.boton}]] <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- REPORTES -->
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-vino text-white text-center py-3">
+                            <i class="fa-solid fa-cash-register fa-lg"></i>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold text-vino">[[#{inicio.cobros.titulo}]]</h5>
+                            <p class="card-text flex-grow-1">[[#{inicio.cobros.desc}]]</p>
+                            <a th:href="@{/cobro/listado}" class="btn btn-vino w-100">
+                                [[#{inicio.cobros.boton}]] <i class="fa-solid fa-chevron-right"></i>
                             </a>
                         </div>
                     </div>
