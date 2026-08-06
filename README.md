@@ -31,7 +31,7 @@ Soda Candy es una aplicación web transaccional que digitaliza la operación de 
 
 > **Leyenda:** Listo · En proceso · Pendiente
 >
-> _Última actualización: 06/07/2026_
+> _Última actualización: 05/08/2026_
 
 ---
 
@@ -50,32 +50,32 @@ Soda Candy es una aplicación web transaccional que digitaliza la operación de 
 
 ### Módulo PEDIDOS — Ronald
 
-- **HU-12** · Agregar ítems al pedido (producto y cantidad) con recálculo del total en vivo. — En proceso
-- **HU-13** · Pedidos tipo `PARA_LLEVAR` (sin mesa, capturando nombre y teléfono). — En proceso
-- **HU-14** · Modificación de ítems antes de enviar a cocina (cambiar cantidades, eliminar líneas y recalcular). — En proceso
-- **HU-16** · Enviar pedido a cocina (cambio de estado a `EN_PREPARACION`). — En proceso
-- **HU-21** · Notas por ítem (campo de texto por línea, con resaltado visual para alergias). — En proceso
+- **HU-12** · Agregar ítems al pedido (producto y cantidad) con recálculo del total en vivo. — Listo
+- **HU-13** · Pedidos tipo `PARA_LLEVAR` (sin mesa, capturando nombre y teléfono). — Listo
+- **HU-14** · Modificación de ítems antes de enviar a cocina (cambiar cantidades, eliminar líneas y recalcular). — Listo
+- **HU-16** · Enviar pedido a cocina (cambio de estado a `EN_PREPARACION`). — Listo
+- **HU-21** · Notas por ítem (campo de texto por línea, con resaltado visual para alergias). — Listo
 
 ### Módulo COCINA + COBRO — Sofía
 
 - **HU-17** · Tablero de cocina con actualización automática (polling) de pedidos pendientes y sus notas. — Listo
 - **HU-18** · Marcar pedido como *Listo* (cambio de estado, salida de la cola y registro de hora). — Listo
 - **HU-19** · Registrar método de pago, cambiar estado a `PAGADO`, liberar la mesa y generar tiquete PDF. — Listo
-- **HU-20** · Reporte de ventas del día (total vendido y productos más vendidos). — Pendiente
+- **HU-20** · Reporte de ventas del día (total vendido y productos más vendidos). — En proceso
 
 ---
 
 ### Transversales (login e idioma)
 
-- **HU-01** · Inicio de sesión con usuario y contraseña según rol. — Pendiente
-- **HU-03** · Restricción por rol (cada rol ve solo sus funciones). — Pendiente
+- **HU-01** · Inicio de sesión con usuario y contraseña según rol. — Listo
+- **HU-03** · Restricción por rol (cada rol ve solo sus funciones). — Listo
 - **HU-04** · Cierre de sesión. — Listo
 - **HU-05** · Cambio de idioma ES/EN (i18n). — Listo
 - **HU-10** · Menú digital público para el cliente (vista sin login, responsiva). — Listo
 
 ---
 
-**Resumen:** 14 de 21 HU listas · Módulo Pedidos (5 HU) en proceso · HU-01 y HU-03 pendientes (login diferido hasta Spring Security).
+**Resumen:** 20 de 21 HU listas · Módulo Pedidos completado · Login y restricción por rol completados · HU-20 (Reporte de ventas del día) en proceso, cierre previsto en el corto plazo.
 
 - La rama main es la rama principal del proyecto. Solo llega código revisado y aprobado por el equipo. Nadie sube cambios directamente a main.
 Reglas del equipo
@@ -134,4 +134,3 @@ Digitalizar la gestión de pedidos y ventas de Soda Candy para contar con un reg
 La base de datos se maneja localmente con MySQL Workbench durante el desarrollo. Las instrucciones de conexión y configuración se documentarán conforme avance el proyecto.
 
 ---
-
