@@ -4,12 +4,9 @@
       th:lang="${#locale.language}" lang="es">
 <head th:replace="~{general/fragmentos :: head}"></head>
 <body class="d-flex flex-column min-vh-100">
-
     <div th:replace="~{staff/fragmentos :: headerStaff}"></div>
-
     <div class="d-flex flex-grow-1">
         <div th:replace="~{staff/fragmentos :: sidebarStaff}"></div>
-
         <main class="flex-grow-1 p-4">
 
             <style>
@@ -17,16 +14,57 @@
                 .rep-tabla th { color:#57423f; text-transform:uppercase; font-size:.8rem; }
                 .rep-total    { background:#590202; color:#fff; font-weight:700; }
                 .rep-total td { color:#fff; }
-                .rep-card     { border:0; }
+                /* Tarjetas resumen (estilo del prototipo) */
+                .kpi-card   { border:0; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+                .kpi-card .kpi-label { color:#8a6d5f; font-size:.75rem; letter-spacing:.5px;
+                                       text-transform:uppercase; font-weight:600; }
+                .kpi-ventas .kpi-valor  { color:#20603f; font-weight:800; font-size:1.9rem; }
+                .kpi-pedidos .kpi-valor { color:#b71416; font-weight:800; font-size:1.9rem; }
+                .btn-pdf { background:#b71416; color:#fff; border-radius:9999px; padding:.5rem 1.4rem; }
+                .btn-pdf:hover { background:#8f0f11; color:#fff; }
             </style>
 
-            <div class="mb-4">
-                <h2 class="rep-titulo mb-1">[[#{reporte.titulo}]]</h2>
-                <p class="text-muted mb-0">[[#{reporte.subtitulo}]]</p>
+            <!-- Encabezado + boton PDF -->
+            <div class="d-flex justify-content-between align-items-start flex-wrap mb-4">
+                <div>
+                    <h2 class="rep-titulo mb-1">[[#{reporte.titulo}]]</h2>
+                    <p class="text-muted mb-0">[[#{reporte.subtituloDia}]]</p>
+                </div>
+                <a th:href="@{/reporte/pdf}" class="btn btn-pdf mt-2 mt-md-0">
+                    <i class="fa-solid fa-file-pdf"></i> [[#{reporte.generarPdf}]]
+                </a>
             </div>
 
-            <div class="card rep-card shadow-sm">
+            <!-- Tarjetas resumen (sin Ticket Promedio) -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card kpi-card kpi-ventas h-100">
+                        <div class="card-body">
+                            <div class="kpi-label mb-2">
+                                <i class="fa-solid fa-sack-dollar"></i> [[#{reporte.ventasDia}]]
+                            </div>
+                            <div class="kpi-valor">&#8353;[[${totalVendido}]]</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card kpi-card kpi-pedidos h-100">
+                        <div class="card-body">
+                            <div class="kpi-label mb-2">
+                                <i class="fa-solid fa-receipt"></i> [[#{reporte.pedidosCobrados}]]
+                            </div>
+                            <div class="kpi-valor">[[${totalCantidad}]]
+                                <span class="fs-6 text-muted fw-normal">[[#{reporte.pedidos}]]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desglose por metodo de pago (solo lo de HOY) -->
+            <div class="card kpi-card">
                 <div class="card-body">
+                    <h6 class="text-uppercase text-muted mb-3">[[#{reporte.porMetodo}]]</h6>
                     <table class="table rep-tabla align-middle mb-0">
                         <thead>
                             <tr>
@@ -55,8 +93,6 @@
 
         </main>
     </div>
-
     <div th:replace="~{staff/fragmentos :: footerStaff}"></div>
-
 </body>
 </html>
