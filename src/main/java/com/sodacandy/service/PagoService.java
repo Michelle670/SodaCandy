@@ -12,6 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sodacandy.domain.LineaReporte;
 import com.sodacandy.domain.MetodoPago;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -115,4 +118,28 @@ public class PagoService {
             throw new IllegalStateException("No se elimina porque tiene datos asociados");
         }
     }
+    
+     //==========================================================
+    // REPORTE DE VENTAS DEL DIA (HU-20, Opcion A: contar por dia)
+    // Igual que getReporteVentas() pero SOLO con los pagos de HOY.
+    // No borra nada: filtra por fecha, asi "vuelve a cero" cada dia.
+    //==========================================================
+    @Transactional(readOnly = true)
+    public List<LineaReporte> getReporteVentasDelDia() {
+        // Rango de hoy: 00:00:00 hasta 23:59:59.999999999
+        LocalDateTime inicio = LocalDate.now().atStartOfDay();
+        LocalDateTime fin = LocalDate.now().atTime(LocalTime.MAX);
+ 
+        Map<MetodoPago, LineaReporte> mapa = new LinkedHashMap<>();
+        for (MetodoPago m : MetodoPago.values()) {
+            mapa.put(m, new LineaReporte(m.name(), 0, BigDecimal.ZERO));
+        }
+        for (Pago pago : pagoRepository.findByFechaBetween(inicio, fin)) {
+            LineaReporte linea = mapa.get(pago.getMetodo());
+            linea.setCantidad(linea.getCantidad() + 1);
+            linea.setTotal(linea.getTotal().add(pago.getMonto()));
+        }
+        return new ArrayList<>(mapa.values());
+    }
+  
 }

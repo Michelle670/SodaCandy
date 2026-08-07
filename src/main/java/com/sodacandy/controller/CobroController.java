@@ -26,9 +26,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 //==============================================================================
 // CURSO : APLICACIONES WEB Y PATRONES
 // PROF: WILBERT MOLINA
@@ -37,13 +39,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 // INTEGRANTES:RONALD CALDERON, SHEILYN CORDOBA, MICHELLE GUERRERO, SOFIA LOAIZA
 //==============================================================================
 /**
- * Controlador del modulo COBRO  - HU-19.
+ * Controlador del modulo COBRO - HU-19.
  *
  * Flujo:
  *   - Lista los pedidos SERVIDO (listos, por cobrar).
  *   - Al elegir uno, muestra su detalle con subtotales y total.
- *   - Al cobrar: registra el Pago, pasa el pedido a PAGADO, y genera el
- *     tiquete PDF descargable (TiqueteService / OpenPDF).
+ *   - El cajero digita el MONTO RECIBIDO:
+ *       * si es menor al total  -> toast "Saldo insuficiente", NO cobra.
+ *       * si alcanza            -> registra el Pago (monto = TOTAL), pasa el
+ *                                  pedido a PAGADO, y deja listo el tiquete.
+ *   - Si el pedido ya fue cobrado -> toast "Este pedido ya fue cobrado"
+ *     (evita el error de generar el tiquete dos veces).
+ *
+ * Nota: en Pago.monto se guarda el TOTAL del pedido (no lo recibido). Lo
+ * recibido solo sirve para validar y calcular el vuelto; guardar lo recibido
+ * inflaria el reporte de ventas.
  */
 //==============================================================================
 @Controller
@@ -70,7 +80,6 @@ public class CobroController {
 
     //==========================================================
     // GET /cobro/listado - lista de pedidos por cobrar (SERVIDO)
-    // Si viene ?idPedido=, ademas carga ese detalle a la derecha.
     //==========================================================
     @GetMapping("/listado")
     public String listado(@RequestParam(required = false) Integer idPedido, Model model) {
@@ -90,23 +99,35 @@ public class CobroController {
     }
 
     //==========================================================
-    // POST /cobro/cobrar - registra el pago y devuelve el tiquete PDF
+    // POST /cobro/cobrar - valida el monto, registra el pago y
+    // REDIRIGE con toast. (El PDF se descarga aparte, en /tiquete.)
     //==========================================================
     @PostMapping("/cobrar")
-    public ResponseEntity<byte[]> cobrar(@RequestParam Integer idPedido,
-                                         @RequestParam MetodoPago metodo) {
+    public String cobrar(@RequestParam Integer idPedido,
+                         @RequestParam MetodoPago metodo,
+                         @RequestParam BigDecimal montoRecibido,
+                         RedirectAttributes ra) {
 
-        // Evita cobrar dos veces el mismo pedido (un solo Pago por pedido)
+        // A) Ya fue cobrado -> toast (evita generar el tiquete dos veces)
         if (pagoService.getPagoPorPedido(idPedido).isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            ra.addFlashAttribute("error", "Este pedido ya fue cobrado.");
+            return "redirect:/cobro/listado";
         }
 
         PedidoCobro pc = pedidoService.getPedido(idPedido).map(this::construir).orElse(null);
         if (pc == null) {
-            return ResponseEntity.notFound().build();
+            ra.addFlashAttribute("error", "No existe el pedido.");
+            return "redirect:/cobro/listado";
         }
 
-        // 1) Registrar el Pago (monto = total del pedido)
+        // B) Validar el monto recibido contra el total
+        if (montoRecibido == null || montoRecibido.compareTo(pc.getTotal()) < 0) {
+            ra.addFlashAttribute("error", "Saldo insuficiente: el monto no cubre el total.");
+            // vuelve al mismo pedido seleccionado para reintentar
+            return "redirect:/cobro/listado?idPedido=" + idPedido;
+        }
+
+        // C) Registrar el Pago (monto = TOTAL, no lo recibido)
         Pago pago = new Pago();
         pago.setIdPedido(idPedido);
         pago.setMonto(pc.getTotal());
@@ -114,17 +135,40 @@ public class CobroController {
         pago.setFecha(LocalDateTime.now());
         pagoService.save(pago);
 
-        // 2) El pedido pasa a PAGADO (sale de la lista de por cobrar)
+        // D) El pedido pasa a PAGADO
         pedidoService.getPedido(idPedido).ifPresent(ped -> {
             ped.setEstado(EstadoPedido.PAGADO);
             pedidoService.save(ped);
         });
 
-        // 3) TODO Sheilyn: liberar la mesa cuando exista MesaService
+        // E) TODO Sheilyn: liberar la mesa cuando exista MesaService
         //    mesaService.liberar(pc.getIdMesa());
 
-        // 4) Generar el tiquete PDF y devolverlo para descarga
-        byte[] pdf = tiqueteService.generarTiquete(pc, metodo.name());
+        // F) Calcular vuelto y avisar con toast de exito + link al tiquete
+        BigDecimal vuelto = montoRecibido.subtract(pc.getTotal());
+        ra.addFlashAttribute("todoOk",
+            "Cobro realizado. Vuelto: \u20A1" + vuelto);
+        ra.addFlashAttribute("tiquetePedido", idPedido); // la vista usa esto para descargar
+
+        return "redirect:/cobro/listado";
+    }
+
+    //==========================================================
+    // GET /cobro/tiquete/{idPedido} - genera y descarga el PDF
+    // (se llama despues de cobrar; el pedido ya tiene su Pago)
+    //==========================================================
+    @GetMapping("/tiquete/{idPedido}")
+    public ResponseEntity<byte[]> tiquete(@PathVariable Integer idPedido) {
+        PedidoCobro pc = pedidoService.getPedido(idPedido).map(this::construir).orElse(null);
+        if (pc == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // el metodo del pago ya guardado
+        String metodo = pagoService.getPagoPorPedido(idPedido)
+                .map(p -> p.getMetodo().name())
+                .orElse("");
+
+        byte[] pdf = tiqueteService.generarTiquete(pc, metodo);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.setContentDispositionFormData("attachment", "tiquete-pedido-" + idPedido + ".pdf");

@@ -14,14 +14,12 @@
 
             <style>
                 .cobro-titulo { color:#590202; font-weight:700; }
-                /* Lista de pendientes (columna izquierda) */
                 .pend-item { display:block; padding:.7rem 1rem; border:1px solid #eee;
                              border-radius:8px; margin-bottom:.5rem; text-decoration:none;
                              color:#57423f; background:#fff; }
                 .pend-item:hover { background:#fff4ec; color:#57423f; }
                 .pend-item.activo { background:#590202; color:#fff; border-color:#590202; }
                 .pend-item .mesa { font-size:.78rem; opacity:.8; }
-                /* Metodo de pago como botones seleccionables */
                 .metodo-label { border:1px solid #d96704; border-radius:8px; padding:.6rem;
                                 text-align:center; cursor:pointer; color:#8a4b00; display:block; }
                 .btn-check:checked + .metodo-label { background:#d96704; color:#fff; }
@@ -61,13 +59,11 @@
                 <!-- ===== DERECHA: detalle + cobro ===== -->
                 <div class="col-lg-8">
 
-                    <!-- Sin seleccion -->
                     <div th:unless="${seleccionado}" class="alert alert-light border text-center py-5">
                         <i class="fa-solid fa-hand-pointer fa-2x text-muted mb-2"></i>
                         <p class="mb-0 text-muted">[[#{cobro.seleccione}]]</p>
                     </div>
 
-                    <!-- Con seleccion -->
                     <div th:if="${seleccionado}" class="card border-0 shadow-sm">
                         <div class="card-body">
                             <h5 class="fw-bold mb-3" style="color:#590202;">
@@ -76,7 +72,6 @@
                                 &middot; [[#{cobro.pedido}]] #[[${seleccionado.idPedido}]]
                             </h5>
 
-                            <!-- Detalle -->
                             <table class="table tabla-detalle mb-3">
                                 <thead>
                                     <tr class="text-muted small text-uppercase">
@@ -99,7 +94,7 @@
                                 </tfoot>
                             </table>
 
-                            <!-- Formulario de cobro -->
+                            <!-- Formulario de cobro (la validacion la hace el servidor y muestra el toast) -->
                             <form th:action="@{/cobro/cobrar}" method="post">
                                 <input type="hidden" name="idPedido" th:value="${seleccionado.idPedido}"/>
 
@@ -114,12 +109,12 @@
                                     </div>
                                 </div>
 
-                                <!-- Ayuda de vuelto (solo visual, para efectivo) -->
                                 <div class="row g-3 mb-3">
                                     <div class="col-6">
                                         <label class="form-label">[[#{cobro.montoRecibido}]]</label>
                                         <input type="number" step="0.01" min="0" class="form-control"
-                                               id="montoRecibido" oninput="calcularVuelto()"/>
+                                               id="montoRecibido" name="montoRecibido"
+                                               oninput="calcularVuelto()" required/>
                                     </div>
                                     <div class="col-6">
                                         <label class="form-label">[[#{cobro.vuelto}]]</label>
@@ -142,8 +137,11 @@
 
     <div th:replace="~{staff/fragmentos :: footerStaff}"></div>
 
+    <!-- Toast compartido de la app (mismo estilo que las demas pantallas) -->
+    <div th:replace="~{general/fragmentos :: mostrarToast}"></div>
+
     <script>
-        // Calcula el vuelto (recibido - total). Solo ayuda visual para efectivo.
+        // Calcula el vuelto (recibido - total) en vivo. Solo es ayuda visual.
         function calcularVuelto() {
             var totalEl = document.getElementById('totalPedido');
             if (!totalEl) return;
@@ -151,6 +149,12 @@
             var recibido = parseFloat(document.getElementById('montoRecibido').value) || 0;
             var vuelto = recibido - total;
             document.getElementById('vuelto').value = vuelto >= 0 ? ('\u20A1' + vuelto.toFixed(2)) : '';
+        }
+
+        // Si el cobro fue exitoso, descarga el tiquete automaticamente.
+        var idTiquete = /*[[${tiquetePedido}]]*/ null;
+        if (idTiquete) {
+            window.location.href = '/cobro/tiquete/' + idTiquete;
         }
     </script>
 
