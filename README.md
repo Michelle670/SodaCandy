@@ -31,7 +31,7 @@ Soda Candy es una aplicación web transaccional que digitaliza la operación de 
 
 > **Leyenda:** Listo · En proceso · Pendiente
 >
-> _Última actualización: 06/08/2026_
+> _Última actualización: 18/08/2026_
 
 ---
 
@@ -75,7 +75,7 @@ Soda Candy es una aplicación web transaccional que digitaliza la operación de 
 
 ---
 
-**Resumen:** 21 de 21 HU listas · Módulo Pedidos completado · Login y restricción por rol completados · HU-20 (Reporte de ventas del día) en proceso, cierre previsto en el corto plazo.
+**Resumen:** 21 de 21 HU listas · Módulo Pedidos completado · Login y restricción por rol completados · HU-20 (Reporte de ventas del día) completos, cierre previsto en el corto plazo.
 
 - La rama main es la rama principal del proyecto. Solo llega código revisado y aprobado por el equipo. Nadie sube cambios directamente a main.
 Reglas del equipo
